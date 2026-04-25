@@ -15,6 +15,32 @@ function logout() {
 }
 
 // ── AUTH SCREEN ──────────────────────────────────────────────
+
+function LandingPage({onGetStarted}){
+  const calledRef=useRef(false);
+  
+  useEffect(()=>{
+    const handler=(e)=>{
+      if(e.data==="tradvix_getstarted" && !calledRef.current){
+        calledRef.current=true;
+        onGetStarted();
+      }
+    };
+    window.addEventListener("message",handler);
+    return()=>window.removeEventListener("message",handler);
+  },[onGetStarted]);
+
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:9999,background:"#0f172a"}}>
+      <iframe
+        src="/landing.html"
+        style={{width:"100%",height:"100%",border:"none"}}
+        title="TRADVIX"
+      />
+    </div>
+  );
+}
+
 function AuthScreen({ onAuth }) {
   const [mode, setMode] = useState('signup');
   const [name, setName] = useState('');
@@ -272,7 +298,8 @@ function TypeText({text,speed=18}){
 // MAIN APP
 // ══════════════════════════════════════════════════════════════════
 export default function App(){
-  const [user, setUser] = useState(() => getUser());
+  const [user, setUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
   const [tab,setTab]=useState("home");
   const [data,setData]=useState({});
   const [scores,setScores]=useState({});
@@ -510,7 +537,10 @@ export default function App(){
 
   // ── SPLASH ───────────────────────────────────────────────────
   // Auth gate
-  if (!user) return <AuthScreen onAuth={u => { saveUser(u); setUser(u); }} />;
+  if(!user){
+    if(!showAuth) return <LandingPage onGetStarted={()=>setShowAuth(true)}/>;
+    return <AuthScreen onAuth={u=>{localStorage.setItem('tv_user',JSON.stringify(u));setUser(u);}}/>;
+  }
 
   if(loading)return(
     <div style={{background:W,height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,padding:24}}>

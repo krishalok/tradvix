@@ -218,19 +218,19 @@ footer{background:#020617;padding:48px 5% 32px}
 
 <!-- NAV -->
 <nav>
-  <a href="/" class="nav-logo">
+  <a href="/?auth=1" class="nav-logo">
     <div class="nav-logo-icon">TX</div>
     <div class="nav-logo-text">TRAD<span>VIX</span></div>
   </a>
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#how">How it works</a>
-    <a href="/">Pricing</a>
+    <a href="/?auth=1">Pricing</a>
     <a href="#aria">ARIA AI</a>
   </div>
   <div class="nav-cta">
-    <a href="/" class="btn-outline">Sign in</a>
-    <a href="/" class="btn-primary">Get started free →</a>
+    <a href="/?auth=1" class="btn-outline">Sign in</a>
+    <a href="/?auth=1" class="btn-primary">Get started free →</a>
   </div>
 </nav>
 
@@ -243,7 +243,7 @@ footer{background:#020617;padding:48px 5% 32px}
   <h1>The World's First<br><em>AI Stock Analyst</em><br>in Your Pocket</h1>
   <p class="hero-sub">TRADVIX combines real market data, institutional-grade analysis, and ARIA — your personal AI analyst — to give you the edge that Wall Street has kept to itself.</p>
   <div class="hero-cta">
-    <a href="/" class="hero-btn-primary">Start for free →</a>
+    <a href="/?auth=1" class="hero-btn-primary">Start for free →</a>
     <a href="#how" class="hero-btn-secondary">See how it works</a>
   </div>
   <div class="hero-stats">
@@ -515,7 +515,7 @@ footer{background:#020617;padding:48px 5% 32px}
         <li class="no">Sector heatmap</li>
         <li class="no">Research papers</li>
       </ul>
-      <a href="/" class="price-btn price-btn-outline">Get started free</a>
+      <a href="/?auth=1" class="price-btn price-btn-outline">Get started free</a>
     </div>
     <!-- Pro -->
     <div class="price-card featured">
@@ -535,7 +535,7 @@ footer{background:#020617;padding:48px 5% 32px}
         <li>Stock news per company</li>
         <li class="no">Deep McKinsey analysis</li>
       </ul>
-      <a href="/" class="price-btn price-btn-filled">Start Pro — $19/mo</a>
+      <a href="/?auth=1" class="price-btn price-btn-filled">Start Pro — $19/mo</a>
     </div>
     <!-- Premium -->
     <div class="price-card">
@@ -555,7 +555,7 @@ footer{background:#020617;padding:48px 5% 32px}
         <li>Export reports to PDF</li>
         <li>Early access to new features</li>
       </ul>
-      <a href="/" class="price-btn price-btn-green">Start Premium — $49/mo</a>
+      <a href="/?auth=1" class="price-btn price-btn-green">Start Premium — $49/mo</a>
     </div>
   </div>
 </section>
@@ -618,37 +618,37 @@ footer{background:#020617;padding:48px 5% 32px}
     <div class="footer-links">
       <h4>Product</h4>
       <ul>
-        <li><a href="/">Features</a></li>
-        <li><a href="/">Pricing</a></li>
-        <li><a href="/">ARIA AI</a></li>
-        <li><a href="/">Changelog</a></li>
+        <li><a href="/?auth=1">Features</a></li>
+        <li><a href="/?auth=1">Pricing</a></li>
+        <li><a href="/?auth=1">ARIA AI</a></li>
+        <li><a href="/?auth=1">Changelog</a></li>
       </ul>
     </div>
     <div class="footer-links">
       <h4>Company</h4>
       <ul>
-        <li><a href="/">About</a></li>
-        <li><a href="/">Blog</a></li>
-        <li><a href="/">Careers</a></li>
-        <li><a href="/">Contact</a></li>
+        <li><a href="/?auth=1">About</a></li>
+        <li><a href="/?auth=1">Blog</a></li>
+        <li><a href="/?auth=1">Careers</a></li>
+        <li><a href="/?auth=1">Contact</a></li>
       </ul>
     </div>
     <div class="footer-links">
       <h4>Legal</h4>
       <ul>
-        <li><a href="/">Privacy Policy</a></li>
-        <li><a href="/">Terms of Service</a></li>
-        <li><a href="/">Disclaimer</a></li>
-        <li><a href="/">Cookie Policy</a></li>
+        <li><a href="/?auth=1">Privacy Policy</a></li>
+        <li><a href="/?auth=1">Terms of Service</a></li>
+        <li><a href="/?auth=1">Disclaimer</a></li>
+        <li><a href="/?auth=1">Cookie Policy</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <div class="footer-copy">© 2026 TRADVIX. All rights reserved. Not financial advice.</div>
     <div class="footer-legal">
-      <a href="/">Privacy</a>
-      <a href="/">Terms</a>
-      <a href="/">Disclaimer</a>
+      <a href="/?auth=1">Privacy</a>
+      <a href="/?auth=1">Terms</a>
+      <a href="/?auth=1">Disclaimer</a>
     </div>
   </div>
 </footer>
@@ -669,6 +669,44 @@ document.querySelector('.cta-submit').addEventListener('click', () => {
     document.querySelector('.cta-form').innerHTML = '<div style="color:#22c55e;font-size:18px;font-weight:600">✓ You\'re on the list! We\'ll be in touch soon.</div>';
   }
 });
+</script>
+<script>
+// Handle all CTA clicks - go to signup
+document.querySelectorAll('a[href="/?auth=1"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    window.top.location.href='/?auth=1';
+  });
+});
+</script>
+
+
+
+<script>
+var _sent=false;
+document.addEventListener('click',function(e){
+  if(_sent) return;
+  var el=e.target.closest('a,button');
+  if(!el) return;
+  var href=el.getAttribute('href')||'';
+  var txt=(el.textContent||'').trim();
+  var isCTA=(
+    href.includes('pricing')||href==='/'||href.includes('auth')||
+    txt.includes('Get started')||txt.includes('Sign in')||
+    txt.includes('Start Pro')||txt.includes('Start Premium')||
+    el.classList.contains('btn-primary')||
+    el.classList.contains('hero-btn-primary')||
+    el.classList.contains('price-btn')||
+    el.classList.contains('btn-outline')||
+    el.classList.contains('cta-submit')
+  );
+  if(isCTA){
+    e.preventDefault();
+    e.stopPropagation();
+    _sent=true;
+    window.parent.postMessage('tradvix_getstarted','*');
+  }
+},true);
 </script>
 </body>
 </html>
