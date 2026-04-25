@@ -298,39 +298,18 @@ function mkRng(seed){
 }
 
 // ── GENERATE RICH DEMO DATA ──────────────────────────────────────
-const BASE_PRICES = {
-  NVDA:875,AAPL:185,MSFT:415,GOOGL:178,AMZN:198,META:502,TSLA:248,
-  AVGO:1402,AMD:158,NFLX:698,JPM:228,GS:508,V:290,MA:486,BAC:41,
-  XOM:118,CVX:157,LLY:875,JNJ:152,UNH:585,WMT:92,COST:895,HD:394,
-  NKE:73,BA:168,CAT:857,DIS:108,
-  SPY:584,QQQ:492,DIA:432,
-};
+const BACKEND = 'https://tradvix-backend.onrender.com';
 
-function generateData(){
-  const day=new Date().toDateString();
-  const out={};
-  [...STOCKS,...IDXS].forEach(st=>{
-    const r=mkRng(st.s+day);
-    const isIdx=IDXS.some(i=>i.s===st.s);
-    const range=isIdx?2.2:8.5;
-    const dp=(r()-0.44)*range;
-    const base=BASE_PRICES[st.s]||100;
-    const pc=base;
-    const c=+(pc*(1+dp/100)).toFixed(2);
-    const o=+(pc*(1+(r()-0.5)*0.008)).toFixed(2);
-    // Build 60-day history
-    const hist=[];let cur=pc*0.88;
-    for(let i=0;i<60;i++){cur=+(cur*(1+(r()-0.47)*0.025)).toFixed(2);hist.push(cur);}
-    hist.push(c);
-    out[st.s]={
-      c,dp:+dp.toFixed(2),d:+(c-pc).toFixed(2),
-      o,h:+(Math.max(o,c)*(1+r()*.007)).toFixed(2),
-      l:+(Math.min(o,c)*(1-r()*.007)).toFixed(2),
-      pc,v:Math.round((r()*40+3)*1e6),
-      hist,name:st.n||st.s,
-    };
-  });
-  return out;
+async function fetchLiveData() {
+  const [quotesRes, gainersRes, losersRes] = await Promise.all([
+    fetch(`${BACKEND}/api/quotes`),
+    fetch(`${BACKEND}/api/gainers`),
+    fetch(`${BACKEND}/api/losers`),
+  ]);
+  const quotes  = await quotesRes.json();
+  const gainers = await gainersRes.json();
+  const losers  = await losersRes.json();
+  return { quotes, gainers, losers };
 }
 
 // ── TECHNICAL INDICATORS ────────────────────────────────────────
@@ -554,27 +533,52 @@ export default function App(){
   const [ariaLines, setAriaLines]= useState([]);
   const [ariaIdx,   setAriaIdx]  = useState(0);
   const [flash,     setFlash]    = useState({});
+  const [gainersList, setGainersList] = useState([]);
+  const [losersList,  setLosersList]  = useState([]);
   const toastT=useRef(null);
 
   const showToast=useCallback(m=>{setToast(m);clearTimeout(toastT.current);toastT.current=setTimeout(()=>setToast(null),2600);},[]);
 
   // ── BOOT ──────────────────────────────────────────────────────
   useEffect(()=>{
-    const msgs=["Initializing ARIA...","Scanning 27 major stocks...","Computing TRADVIX Scores...","Running 6-dimension analysis...","Generating AI price targets...","Briefing ARIA...","Ready."];
-    let mi=0;
-    const iv=setInterval(()=>{if(mi<msgs.length){setProgMsg(msgs[mi++]);setProg(Math.round(mi/msgs.length*100));}else clearInterval(iv);},320);
-    setTimeout(()=>{
+    (async()=>{
+      const msgs=[
+        "Connecting to TRADVIX backend...",
+        "Fetching live market prices...",
+        "Discovering today's movers...",
+        "Computing TRADVIX Scores...",
+        "Running AI signal analysis...",
+        "Briefing ARIA...",
+        "Ready."
+      ];
+      let mi=0;
+      const iv=setInterval(()=>{if(mi<msgs.length){setProgMsg(msgs[mi++]);setProg(Math.round(mi/msgs.length*100));}else clearInterval(iv);},400);
+      try {
+        const { quotes, gainers, losers } = await fetchLiveData();
+        const d={};
+        Object.entries(quotes).forEach(([sym,q])=>{
+          const hist=[];let cur=q.pc*0.88;
+          const r=mkRng(sym+new Date().toDateString());
+          for(let i=0;i<60;i++){cur=+(cur*(1+(r()-0.47)*0.025)).toFixed(2);hist.push(cur);}
+          hist.push(q.c);
+          d[sym]={...q,hist};
+        });
+        setData(d);
+        setGainersList(gainers||[]);
+        setLosersList(losers||[]);
+        const sc={};
+        Object.keys(d).forEach(sym=>{sc[sym]=computeTRADVIXScore(sym,d[sym]);});
+        setScores(sc);
+        setAriaLines(getARIAMorningBrief(d,sc));
+      } catch(e) {
+        console.error('Live data error:',e);
+        setProgMsg('Connection error. Check backend.');
+      }
       clearInterval(iv);
-      const d=generateData();
-      setData(d);
-      const sc={};
-      [...STOCKS,...IDXS].forEach(st=>{sc[st.s]=computeTRADVIXScore(st.s,d[st.s]);});
-      setScores(sc);
-      setAriaLines(getARIAMorningBrief(d,sc));
-      setProg(100);setProgMsg("Ready.");
-      setTimeout(()=>setLoading(false),300);
-    },2200);
-    return()=>clearInterval(iv);
+      setProg(100);setProgMsg("TRADVIX ready ✓");
+      await new Promise(r=>setTimeout(r,300));
+      setLoading(false);
+    })();
   },[]);
 
   // ── CLOCK ─────────────────────────────────────────────────────
@@ -590,21 +594,27 @@ export default function App(){
     return()=>clearInterval(id);
   },[ariaLines]);
 
-  // ── SIMULATE LIVE PRICE TICKS ──────────────────────────────────
+  // ── AUTO REFRESH EVERY 60 SECONDS ──────────────────────────────
   useEffect(()=>{
     if(loading)return;
-    const id=setInterval(()=>{
-      const sym=STOCKS[Math.floor(Math.random()*STOCKS.length)].s;
-      setData(prev=>{
-        if(!prev[sym])return prev;
-        const tick=(Math.random()-0.5)*0.08*prev[sym].c/100;
-        const nc=+(prev[sym].c+tick).toFixed(2);
-        const ndp=+((nc-prev[sym].pc)/prev[sym].pc*100).toFixed(2);
-        const newHist=[...prev[sym].hist.slice(-59),nc];
-        return{...prev,[sym]:{...prev[sym],c:nc,dp:ndp,d:+(nc-prev[sym].pc).toFixed(2),hist:newHist}};
-      });
-      setFlash(p=>({...p,[sym]:Date.now()}));
-    },1800);
+    const id=setInterval(async()=>{
+      try {
+        const {quotes,gainers,losers}=await fetchLiveData();
+        setData(prev=>{
+          const d={};
+          Object.entries(quotes).forEach(([sym,q])=>{
+            const prevQ=prev[sym];
+            const hist=prevQ?.hist?[...prevQ.hist.slice(-59),q.c]:[q.c];
+            if(prevQ&&Math.abs(q.c-prevQ.c)>0.01)setFlash(p=>({...p,[sym]:Date.now()}));
+            d[sym]={...q,hist};
+          });
+          return d;
+        });
+        setGainersList(gainers||[]);
+        setLosersList(losers||[]);
+        showToast("Live data refreshed ✓");
+      } catch(e){console.error('Refresh error:',e);}
+    },60000);
     return()=>clearInterval(id);
   },[loading]);
 
@@ -614,7 +624,18 @@ export default function App(){
   // ── COMPUTED ──────────────────────────────────────────────────
   const allQ=STOCKS.map(s=>({...s,q:data[s.s],sc:scores[s.s]})).filter(x=>x.q);
   const sorted=[...allQ].sort((a,b)=>b.q.dp-a.q.dp);
-  const gainers=sorted.slice(0,10),losers=sorted.slice(-10).reverse();
+  const gainers=gainersList.length>0?gainersList.map(x=>({
+    s:x.symbol,n:x.name||x.symbol,
+    e:STOCKS.find(s=>s.s===x.symbol)?.e||'📈',
+    q:data[x.symbol]||{c:x.price,dp:x.changesPercentage||0,d:x.change||0,hist:[]},
+    sc:scores[x.symbol],
+  })).filter(x=>x.q.c):sorted.slice(0,10);
+  const losers=losersList.length>0?losersList.map(x=>({
+    s:x.symbol,n:x.name||x.symbol,
+    e:STOCKS.find(s=>s.s===x.symbol)?.e||'📉',
+    q:data[x.symbol]||{c:x.price,dp:x.changesPercentage||0,d:x.change||0,hist:[]},
+    sc:scores[x.symbol],
+  })).filter(x=>x.q.c):sorted.slice(-10).reverse();
   const adv=allQ.filter(x=>x.q.dp>=0).length,dec=allQ.filter(x=>x.q.dp<0).length;
   const upPct=Math.round(adv/(adv+dec||1)*100);
   const buyCnt=Object.values(scores).filter(s=>s?.dec?.includes("BUY")).length;
