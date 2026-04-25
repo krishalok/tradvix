@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const BACKEND = 'http://localhost:4000';
+const BACKEND = 'https://tradvix-backend.onrender.com';
 
 // ── API ──────────────────────────────────────────────────────────
 const api = async (path) => {
