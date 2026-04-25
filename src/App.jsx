@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    TRADVIX — AI STOCK INTELLIGENCE
@@ -300,6 +300,12 @@ function mkRng(seed){
 // ── GENERATE RICH DEMO DATA ──────────────────────────────────────
 const BACKEND = 'https://tradvix-backend.onrender.com';
 
+
+async function fetchAnalysis(symbol, level='novice') {
+  const res = await fetch(`${BACKEND}/api/analyze/${symbol}?level=${level}`);
+  return res.json();
+}
+
 async function fetchLiveData() {
   const [quotesRes, gainersRes, losersRes] = await Promise.all([
     fetch(`${BACKEND}/api/quotes`),
@@ -529,13 +535,20 @@ export default function App(){
   const [sigFilter, setSigFilter]= useState("ALL");
   const [srch,      setSrch]     = useState("");
   const [toast,     setToast]    = useState(null);
-  const [time,      setTime]     = useState("");
   const [ariaLines, setAriaLines]= useState([]);
   const [ariaIdx,   setAriaIdx]  = useState(0);
   const [flash,     setFlash]    = useState({});
   const [gainersList, setGainersList] = useState([]);
+  const [ariaAnalysis, setAriaAnalysis] = useState({});
+  const [sheetData, setSheetData] = useState(null);
+  useEffect(()=>{sheetOpen.current=!!sheet;},[sheet]);
+  const [ariaLevel, setAriaLevel] = useState('novice');
+  const [ariaLoading, setAriaLoading] = useState(false);
+  
+  
   const [losersList,  setLosersList]  = useState([]);
   const toastT=useRef(null);
+  const sheetOpen=useRef(false);
 
   const showToast=useCallback(m=>{setToast(m);clearTimeout(toastT.current);toastT.current=setTimeout(()=>setToast(null),2600);},[]);
 
@@ -581,9 +594,15 @@ export default function App(){
     })();
   },[]);
 
-  // ── CLOCK ─────────────────────────────────────────────────────
+  // ── CLOCK — updates DOM directly to avoid re-renders ──────────
+  const clockRef=useRef(null);
   useEffect(()=>{
-    const t=()=>{try{setTime(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())+" ET");}catch{}};
+    const t=()=>{
+      try{
+        const s=new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hour:"2-digit",minute:"2-digit",second:"2-digit"}).format(new Date())+" ET";
+        if(clockRef.current) clockRef.current.textContent=s;
+      }catch{}
+    };
     t();const id=setInterval(t,1000);return()=>clearInterval(id);
   },[]);
 
@@ -600,6 +619,7 @@ export default function App(){
     const id=setInterval(async()=>{
       try {
         const {quotes,gainers,losers}=await fetchLiveData();
+        if(sheetOpen.current) return;
         setData(prev=>{
           const d={};
           Object.entries(quotes).forEach(([sym,q])=>{
@@ -619,6 +639,7 @@ export default function App(){
   },[loading]);
 
   // ── WATCHLIST ──────────────────────────────────────────────────
+  sheetOpen.current=!!sheet;
   const toggleWL=sym=>{setWl(prev=>{const n=new Set(prev);n.has(sym)?(n.delete(sym),showToast("Removed")):( n.add(sym),showToast("Added to watchlist ⭐"));try{localStorage.setItem("tv5",JSON.stringify([...n]));}catch{}return n;});};
 
   // ── COMPUTED ──────────────────────────────────────────────────
@@ -653,9 +674,9 @@ export default function App(){
   const scoreColor=s=>s>=72?"#00ff66":s>=58?"#66ff99":s>=44?"#ffbe0b":s>=30?"#ff7088":"#ff2d55";
 
   const SRow=({sym,name,q,sc,rank,gain,emoji})=>{
-    const isNew=flash[sym]&&Date.now()-flash[sym]<1800;
+    const isNew=flash[sym]&&Date.now()-flash[sym]<800;
     return(
-      <div className={`srow ${gain?"bull":"bear"} ${isNew?(gain?"flash-g":"flash-r"):""}`} onClick={()=>setSheet(sym)}>
+      <div className={`srow ${gain?"bull":"bear"} ${isNew?(gain?"flash-g":"flash-r"):""}`} onClick={()=>{setSheet(sym);setSheetData({...data[sym]});}}>
         {rank&&<div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:10,color:"var(--muted2)",width:18,flexShrink:0,textAlign:"center"}}>{rank}</div>}
         <div style={{fontSize:18,flexShrink:0}}>{emoji||"📈"}</div>
         <div style={{flex:1,minWidth:0}}>
@@ -701,10 +722,10 @@ export default function App(){
   );
 
   // ── SHEET ──────────────────────────────────────────────────────
-  const Sheet=()=>{
+  const Sheet=React.memo(()=>{
     if(!sheet)return null;
     const stk=STOCKS.find(s=>s.s===sheet);
-    const q=data[sheet];const sc=scores[sheet];
+    const q=sheetData||data[sheet];const sc=scores[sheet];
     if(!q)return null;
     const up=q.dp>=0;
     const{displayed:ariaText}=useTypewriter(sc?.ariaLines||"",20,true);
@@ -758,17 +779,49 @@ export default function App(){
               </div>
             )}
 
-            {/* ── ARIA ANALYSIS ── */}
+            {/* ── ARIA AI ANALYSIS ── */}
             <div>
-              <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+              <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
                 <div className="aria-avatar">AI</div>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:8,color:"var(--green)",letterSpacing:2,marginBottom:6}}>ARIA — AI ANALYST</div>
-                  <div className="aria-bubble" style={{fontSize:12}}>
-                    {ariaParts.map((p,i)=>p.startsWith("**")&&p.endsWith("**")
-                      ?<strong key={i} style={{color:"var(--green)"}}>{p.slice(2,-2)}</strong>
-                      :<span key={i}>{p}</span>
+                  <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:8,color:"var(--green)",letterSpacing:2,marginBottom:8}}>ARIA — LLAMA 3.3 AI ANALYST</div>
+                  {/* Level Selector */}
+                  <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+                    {['novice','intermediate','expert','deep'].map(l=>(
+                      <button key={l} onClick={async()=>{
+                        setAriaLevel(l);
+                        setAriaLoading(true);
+                        try{
+                          const res=await fetchAnalysis(sheet,l);
+                          setAriaAnalysis(prev=>({...prev,[sheet+'_'+l]:res.analysis}));
+                        }catch(e){console.error(e);}
+                        setAriaLoading(false);
+                      }} style={{
+                        padding:"4px 10px",borderRadius:20,border:"1px solid",cursor:"pointer",
+                        fontFamily:"'IBM Plex Mono',monospace",fontSize:9,
+                        background:ariaLevel===l?"var(--green)":"transparent",
+                        color:ariaLevel===l?"#000":"var(--green)",
+                        borderColor:ariaLevel===l?"var(--green)":"rgba(0,255,102,0.2)",
+                        fontWeight:ariaLevel===l?700:400,
+                        textTransform:"uppercase",
+                      }}>{l}</button>
+                    ))}
+                  </div>
+                  {/* Analysis Output */}
+                  <div className="aria-bubble" style={{fontSize:12,minHeight:80}}>
+                    {ariaLoading?(
+                      <span style={{color:"var(--muted2)"}}>ARIA is analyzing {sheet}...<span className="cursor"/></span>
+                    ):ariaAnalysis[sheet+'_'+ariaLevel]?(
+                      <span style={{whiteSpace:"pre-wrap"}}>{ariaAnalysis[sheet+'_'+ariaLevel]}</span>
+                    ):(
+                      <span style={{color:"var(--muted2)"}}>
+                        Select an analysis level above to get AI-powered insights from Llama 3.3 70B
+                        <span className="cursor"/>
+                      </span>
                     )}
+                  </div>
+                  <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:8,color:"var(--muted)",marginTop:6}}>
+                    Powered by Llama 3.3 70B via Groq · Cached 1hr · Not financial advice
                   </div>
                 </div>
               </div>
@@ -820,7 +873,7 @@ export default function App(){
         </div>
       </div>
     );
-  };
+  }, ()=>true);
 
   // ══════════════════════════════════════════════════════════════
   // RENDER
@@ -837,7 +890,7 @@ export default function App(){
           <div className="logo-text">TRAD<span>VIX</span></div>
         </div>
         <div className="live-wrap">
-          <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,color:"var(--muted2)"}}>{time}</div>
+          <div ref={clockRef} style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,color:"var(--muted2)"}}></div>
           <div className="live-pill">
             <div className="live-dot"/>
             {mktOpen?"LIVE":"CLOSED"}
