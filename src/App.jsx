@@ -4,22 +4,21 @@ const BACKEND = 'https://tradvix-backend.onrender.com';
 
 function getToken(){return sessionStorage.getItem("tv_token");}
 function saveToken(t){sessionStorage.setItem("tv_token",t);}
-function getUser(){try{const t=getToken();if(!t)return null;const p=JSON.parse(atob(t.split(".")[1]));return p.exp*1000>Date.now()?p:null;}catch{return null;}}
+function getUser(){
+  try{
+    const t=getToken();
+    if(!t)return null;
+    const p=JSON.parse(atob(t.split(".")[1]));
+    return p.exp*1000>Date.now()?p:null;
+  }catch(e){
+    return null;
+  }
+}
 function saveUser(u){}
 function logout(){sessionStorage.removeItem("tv_token");window.location.reload();}
 
 
-// ── AUTH HELPERS ─────────────────────────────────────────────
-function getUser() {
-  try { return JSON.parse(localStorage.getItem('tv_user')||'null'); } catch { return null; }
-}
-function saveUser(u) {
-  localStorage.setItem('tv_user', JSON.stringify(u));
-}
-function logout() {
-  localStorage.removeItem('tv_user');
-  window.location.reload();
-}
+
 
 // ── AUTH SCREEN ──────────────────────────────────────────────
 
