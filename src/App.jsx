@@ -61,22 +61,20 @@ function AuthScreen({ onAuth }) {
     if (mode === 'signup' && !name) { setError('Please enter your name'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    if (mode === 'signup') {
-      const users = JSON.parse(localStorage.getItem('tv_users')||'[]');
-      if (users.find(u => u.email === email)) { setError('Email already registered'); setLoading(false); return; }
-      const user = { id: Date.now(), name, email, tier: 'free', joined: new Date().toISOString() };
-      users.push({ ...user, password });
-      localStorage.setItem('tv_users', JSON.stringify(users));
-      saveUser(user);
-      onAuth(user);
-    } else {
-      const users = JSON.parse(localStorage.getItem('tv_users')||'[]');
-      const found = users.find(u => u.email === email && u.password === password);
-      if (!found) { setError('Invalid email or password'); setLoading(false); return; }
-      const user = { id: found.id, name: found.name, email: found.email, tier: found.tier||'free', joined: found.joined };
-      saveUser(user);
-      onAuth(user);
+    try{
+      const endpoint=mode==='signup'?'/auth/signup':'/auth/login';
+      const body=mode==='signup'?{name,email,password}:{email,password};
+      const res=await fetch('https://tradvix-backend.onrender.com'+endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+      const data=await res.json();
+      if(!res.ok){setError(data.error||'Something went wrong');setLoading(false);return;}
+      saveToken(data.token);
+      onAuth(data.user);
+    }catch(e){
+      setError('Connection error. Please try again.');
     }
     setLoading(false);
   };
