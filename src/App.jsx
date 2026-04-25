@@ -2,6 +2,131 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
 
+// ── AUTH HELPERS ─────────────────────────────────────────────
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('tv_user')||'null'); } catch { return null; }
+}
+function saveUser(u) {
+  localStorage.setItem('tv_user', JSON.stringify(u));
+}
+function logout() {
+  localStorage.removeItem('tv_user');
+  window.location.reload();
+}
+
+// ── AUTH SCREEN ──────────────────────────────────────────────
+function AuthScreen({ onAuth }) {
+  const [mode, setMode] = useState('signup');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setError('');
+    if (!email || !password) { setError('Please fill in all fields'); return; }
+    if (mode === 'signup' && !name) { setError('Please enter your name'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return; }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 800));
+    if (mode === 'signup') {
+      const users = JSON.parse(localStorage.getItem('tv_users')||'[]');
+      if (users.find(u => u.email === email)) { setError('Email already registered'); setLoading(false); return; }
+      const user = { id: Date.now(), name, email, tier: 'free', joined: new Date().toISOString() };
+      users.push({ ...user, password });
+      localStorage.setItem('tv_users', JSON.stringify(users));
+      saveUser(user);
+      onAuth(user);
+    } else {
+      const users = JSON.parse(localStorage.getItem('tv_users')||'[]');
+      const found = users.find(u => u.email === email && u.password === password);
+      if (!found) { setError('Invalid email or password'); setLoading(false); return; }
+      const user = { id: found.id, name: found.name, email: found.email, tier: found.tier||'free', joined: found.joined };
+      saveUser(user);
+      onAuth(user);
+    }
+    setLoading(false);
+  };
+
+  const N = '#0f172a', G = '#16a34a';
+
+  return (
+    <div style={{minHeight:'100vh',background:'#f8fafc',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,fontFamily:'system-ui,-apple-system,sans-serif'}}>
+      <div style={{width:'100%',maxWidth:400}}>
+        {/* Logo */}
+        <div style={{display:'flex',alignItems:'center',gap:10,justifyContent:'center',marginBottom:40}}>
+          <div style={{width:40,height:40,background:N,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'monospace',fontSize:14,fontWeight:800,color:'#22c55e'}}>TX</div>
+          <div style={{fontFamily:'system-ui',fontWeight:800,fontSize:22,color:N,letterSpacing:.5}}>TRAD<span style={{color:G}}>VIX</span></div>
+        </div>
+
+        {/* Card */}
+        <div style={{background:'white',border:'1px solid #e2e8f0',borderRadius:20,padding:32,boxShadow:'0 4px 24px rgba(0,0,0,.06)'}}>
+          <h2 style={{fontSize:22,fontWeight:700,color:N,marginBottom:6,letterSpacing:-.5}}>
+            {mode==='signup'?'Create your account':'Welcome back'}
+          </h2>
+          <p style={{fontSize:14,color:'#64748b',marginBottom:28}}>
+            {mode==='signup'?'Start your free TRADVIX account today':'Sign in to your TRADVIX account'}
+          </p>
+
+          {mode==='signup'&&(
+            <div style={{marginBottom:16}}>
+              <label style={{display:'block',fontSize:13,fontWeight:600,color:N,marginBottom:6}}>Full Name</label>
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="Alok Kumar Jha"
+                style={{width:'100%',padding:'11px 14px',border:'1.5px solid #e2e8f0',borderRadius:10,fontSize:14,color:N,outline:'none',fontFamily:'system-ui',transition:'border-color .2s'}}
+                onFocus={e=>e.target.style.borderColor='#0f172a'}
+                onBlur={e=>e.target.style.borderColor='#e2e8f0'}/>
+            </div>
+          )}
+
+          <div style={{marginBottom:16}}>
+            <label style={{display:'block',fontSize:13,fontWeight:600,color:N,marginBottom:6}}>Email Address</label>
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" type="email"
+              style={{width:'100%',padding:'11px 14px',border:'1.5px solid #e2e8f0',borderRadius:10,fontSize:14,color:N,outline:'none',fontFamily:'system-ui',transition:'border-color .2s'}}
+              onFocus={e=>e.target.style.borderColor='#0f172a'}
+              onBlur={e=>e.target.style.borderColor='#e2e8f0'}/>
+          </div>
+
+          <div style={{marginBottom:24}}>
+            <label style={{display:'block',fontSize:13,fontWeight:600,color:N,marginBottom:6}}>Password</label>
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Min. 6 characters" type="password"
+              onKeyDown={e=>e.key==='Enter'&&submit()}
+              style={{width:'100%',padding:'11px 14px',border:'1.5px solid #e2e8f0',borderRadius:10,fontSize:14,color:N,outline:'none',fontFamily:'system-ui',transition:'border-color .2s'}}
+              onFocus={e=>e.target.style.borderColor='#0f172a'}
+              onBlur={e=>e.target.style.borderColor='#e2e8f0'}/>
+          </div>
+
+          {error&&<div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:8,padding:'10px 14px',fontSize:13,color:'#dc2626',marginBottom:16}}>{error}</div>}
+
+          <button onClick={submit} disabled={loading}
+            style={{width:'100%',padding:13,background:loading?'#94a3b8':N,border:'none',borderRadius:10,fontSize:15,fontWeight:700,color:'white',cursor:loading?'not-allowed':'pointer',transition:'all .2s',marginBottom:16}}>
+            {loading?'Please wait...':(mode==='signup'?'Create free account →':'Sign in →')}
+          </button>
+
+          {mode==='signup'&&(
+            <div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:8,padding:'10px 14px',fontSize:12,color:'#15803d',marginBottom:16,textAlign:'center'}}>
+              ✓ Free forever &nbsp;·&nbsp; No credit card required &nbsp;·&nbsp; Cancel anytime
+            </div>
+          )}
+
+          <div style={{textAlign:'center',fontSize:13,color:'#64748b'}}>
+            {mode==='signup'?'Already have an account? ':"Don't have an account? "}
+            <span onClick={()=>{setMode(mode==='signup'?'login':'signup');setError('');}} 
+              style={{color:N,fontWeight:700,cursor:'pointer',textDecoration:'underline'}}>
+              {mode==='signup'?'Sign in':'Sign up free'}
+            </span>
+          </div>
+        </div>
+
+        <div style={{textAlign:'center',marginTop:20,fontSize:12,color:'#94a3b8'}}>
+          By continuing you agree to our Terms of Service and Privacy Policy.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 // ── API ──────────────────────────────────────────────────────────
 const api = async (path) => {
   const r = await fetch(`${BACKEND}${path}`);
@@ -147,6 +272,7 @@ function TypeText({text,speed=18}){
 // MAIN APP
 // ══════════════════════════════════════════════════════════════════
 export default function App(){
+  const [user, setUser] = useState(() => getUser());
   const [tab,setTab]=useState("home");
   const [data,setData]=useState({});
   const [scores,setScores]=useState({});
@@ -383,6 +509,9 @@ export default function App(){
   };
 
   // ── SPLASH ───────────────────────────────────────────────────
+  // Auth gate
+  if (!user) return <AuthScreen onAuth={u => { saveUser(u); setUser(u); }} />;
+
   if(loading)return(
     <div style={{background:W,height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,padding:24}}>
       <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
@@ -641,6 +770,9 @@ export default function App(){
           </div>
           <button onClick={()=>setChatOpen(true)} style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:20,padding:"4px 12px",color:"white",fontSize:11,cursor:"pointer",fontFamily:"monospace",letterSpacing:.5}}>
             🧠 ARIA
+          </button>
+          <button onClick={logout} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:20,padding:"4px 10px",color:"rgba(255,255,255,.5)",fontSize:10,cursor:"pointer",fontFamily:"monospace"}}>
+            {user?.name?.split(' ')[0]||'Account'} ↗
           </button>
         </div>
       </div>
