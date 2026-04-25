@@ -799,7 +799,10 @@ export default function App(){
       <div style={{background:N,padding:"0 16px",height:54,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:32,height:32,borderRadius:9,background:"#00e676",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:800,color:N}}>&lt;FQ&gt;</div>
-          <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:18,color:"white",letterSpacing:1}}>TRAD<span style={{color:"#00e676"}}>VIX</span></div>
+          <div>
+            <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:15,color:"white",letterSpacing:1,lineHeight:1.1}}>FINTEL</div>
+            <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:15,color:"#22c55e",letterSpacing:1,lineHeight:1.1}}>QUANTUM</div>
+          </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div ref={clockRef} style={{fontFamily:"monospace",fontSize:9,color:"rgba(255,255,255,.4)"}}/>

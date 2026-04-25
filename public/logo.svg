@@ -1,0 +1,6 @@
+<svg width="160" height="40" viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="20,8 29,3 38,8 38,18 29,23 20,18" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="29" y="17" font-family="monospace" font-size="8" font-weight="700" fill="#22c55e" text-anchor="middle">FQ</text>
+  <text x="55" y="17" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="white" text-anchor="start">FINTEL</text>
+  <text x="55" y="31" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="#22c55e" text-anchor="start">QUANTUM</text>
+</svg>
