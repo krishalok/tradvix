@@ -155,12 +155,17 @@ function AuthScreen({ onAuth }) {
 
 // ── API ──────────────────────────────────────────────────────────
 const api = async (path) => {
-  const r = await fetch(`${BACKEND}${path}`);
+  const token = getToken();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const r = await fetch(`${BACKEND}${path}`, { headers });
   if (!r.ok) throw new Error(`API error ${r.status}`);
   return r.json();
 };
 const apiPost = async (path, body) => {
-  const r = await fetch(`${BACKEND}${path}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  const token = getToken();
+  const headers = {'Content-Type':'application/json'};
+  if(token) headers['Authorization'] = `Bearer ${token}`;
+  const r = await fetch(`${BACKEND}${path}`, { method:'POST', headers, body:JSON.stringify(body) });
   return r.json();
 };
 
