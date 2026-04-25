@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const BACKEND = 'https://tradvix-backend.onrender.com';
+const BACKEND = 'https://fintelquantum-backend.onrender.com';
 
 function getToken(){return sessionStorage.getItem("tv_token");}
 function saveToken(t){sessionStorage.setItem("tv_token",t);}
@@ -27,7 +27,7 @@ function LandingPage({onGetStarted}){
   
   useEffect(()=>{
     const handler=(e)=>{
-      if(e.data==="tradvix_getstarted" && !calledRef.current){
+      if(e.data==="fintelquantum_getstarted" && !calledRef.current){
         calledRef.current=true;
         onGetStarted();
       }
@@ -41,7 +41,7 @@ function LandingPage({onGetStarted}){
       <iframe
         src="/landing.html"
         style={{width:"100%",height:"100%",border:"none"}}
-        title="TRADVIX"
+        title="FINTEL QUANTUM"
       />
     </div>
   );
@@ -64,7 +64,7 @@ function AuthScreen({ onAuth }) {
     try{
       const endpoint=mode==='signup'?'/auth/signup':'/auth/login';
       const body=mode==='signup'?{name,email,password}:{email,password};
-      const res=await fetch('https://tradvix-backend.onrender.com'+endpoint,{
+      const res=await fetch('https://fintelquantum-backend.onrender.com'+endpoint,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(body)
@@ -86,8 +86,8 @@ function AuthScreen({ onAuth }) {
       <div style={{width:'100%',maxWidth:400}}>
         {/* Logo */}
         <div style={{display:'flex',alignItems:'center',gap:10,justifyContent:'center',marginBottom:40}}>
-          <div style={{width:40,height:40,background:N,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'monospace',fontSize:14,fontWeight:800,color:'#22c55e'}}>TX</div>
-          <div style={{fontFamily:'system-ui',fontWeight:800,fontSize:22,color:N,letterSpacing:.5}}>TRAD<span style={{color:G}}>VIX</span></div>
+          <div style={{width:40,height:40,background:N,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'monospace',fontSize:14,fontWeight:800,color:'#22c55e'}}>&lt;FQ&gt;</div>
+          <div style={{fontFamily:'system-ui',fontWeight:800,fontSize:22,color:N,letterSpacing:.5}}>FINTEL<span style={{color:G}}>QUANTUM</span></div>
         </div>
 
         {/* Card */}
@@ -96,7 +96,7 @@ function AuthScreen({ onAuth }) {
             {mode==='signup'?'Create your account':'Welcome back'}
           </h2>
           <p style={{fontSize:14,color:'#64748b',marginBottom:28}}>
-            {mode==='signup'?'Start your free TRADVIX account today':'Sign in to your TRADVIX account'}
+            {mode==='signup'?'Start your free FINTEL QUANTUM account today':'Sign in to your FINTEL QUANTUM account'}
           </p>
 
           {mode==='signup'&&(
@@ -202,7 +202,7 @@ function calcSMA(a,n){if(!a||a.length<n)return null;return +(a.slice(-n).reduce(
 function calcEMA(a,n){if(!a||a.length<n)return null;const k=2/(n+1);let e=a.slice(0,n).reduce((s,v)=>s+v,0)/n;for(let i=n;i<a.length;i++)e=a[i]*k+e*(1-k);return +e.toFixed(2);}
 function calcBoll(c,n=20){if(!c||c.length<n)return null;const m=calcSMA(c,n),std=Math.sqrt(c.slice(-n).reduce((s,v)=>s+(v-m)**2,0)/n);return{u:+(m+2*std).toFixed(2),l:+(m-2*std).toFixed(2),m};}
 
-// ── TRADVIX SCORE ────────────────────────────────────────────────
+// ── FINTEL QUANTUM SCORE ────────────────────────────────────────────────
 function computeScore(sym,q){
   if(!q)return null;
   const c=q.hist,p=q.c;
@@ -348,12 +348,12 @@ export default function App(){
   useEffect(()=>{
     (async()=>{
       const steps=[
-        [10,"Connecting to TRADVIX backend..."],
+        [10,"Connecting to FINTEL QUANTUM backend..."],
         [25,"Fetching live market prices..."],
         [40,"Loading sector data..."],
         [55,"Getting earnings calendar..."],
         [65,"Fetching macro indicators..."],
-        [75,"Computing TRADVIX Scores..."],
+        [75,"Computing FINTEL QUANTUM Scores..."],
         [85,"Briefing ARIA..."],
         [95,"Finalizing..."],
       ];
@@ -395,12 +395,12 @@ export default function App(){
         setAriaLines([
           `${greet}. I've scanned ${Object.keys(d).length} stocks across all major sectors.`,
           `Market sentiment is **${mood.toUpperCase()}** today — ${upPct}% of stocks are advancing.`,
-          topBuy?`My top pick today is **${topBuy[0]}** with a TRADVIX Score of ${topBuy[1].total} — ${topBuy[1].brief}`:"",
+          topBuy?`My top pick today is **${topBuy[0]}** with a FINTEL QUANTUM Score of ${topBuy[1].total} — ${topBuy[1].brief}`:"",
           earnData?.length?`Earnings watch: **${earnData[0]?.symbol}** reports ${new Date(earnData[0]?.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}. Revenue est: ${(earnData[0]?.revenueEstimate/1e9).toFixed(1)}B.`:"",
           `Stay sharp. I update every 60 seconds with live market data.`,
         ].filter(Boolean));
       }catch(e){console.error("Boot error:",e);setProgMsg("Error loading data. Check backend.");}
-      clearInterval(iv);setProg(100);setProgMsg("TRADVIX ready ✓");
+      clearInterval(iv);setProg(100);setProgMsg("FINTEL QUANTUM ready ✓");
       await new Promise(r=>setTimeout(r,300));
       setLoading(false);
     })();
@@ -497,7 +497,7 @@ export default function App(){
       <span style={{fontSize:big?18:11}}>{sc.emoji}</span>
       <div>
         <div style={{fontFamily:"monospace",fontSize:big?12:9,fontWeight:700,color:c.text,letterSpacing:big?1:.5}}>{sc.dec}</div>
-        {big&&<div style={{fontFamily:"monospace",fontSize:9,color:c.text+"99",marginTop:1}}>TRADVIX Score: {sc.total}</div>}
+        {big&&<div style={{fontFamily:"monospace",fontSize:9,color:c.text+"99",marginTop:1}}>FINTEL QUANTUM Score: {sc.total}</div>}
       </div>
     </div>;
   };
@@ -555,9 +555,9 @@ export default function App(){
     <div style={{background:W,height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,padding:24}}>
       <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
       <div style={{display:"flex",alignItems:"center",gap:12}}>
-        <div style={{width:52,height:52,borderRadius:14,background:N,display:"flex",alignItems:"center",justifyContent:"center",color:"#00e676",fontWeight:800,fontSize:18,fontFamily:"monospace"}}>TX</div>
+        <div style={{width:52,height:52,borderRadius:14,background:N,display:"flex",alignItems:"center",justifyContent:"center",color:"#00e676",fontWeight:800,fontSize:18,fontFamily:"monospace"}}>&lt;FQ&gt;</div>
         <div>
-          <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:28,color:N,letterSpacing:2}}>TRADVIX</div>
+          <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:28,color:N,letterSpacing:2}}>FINTEL QUANTUM</div>
           <div style={{fontFamily:"monospace",fontSize:10,color:"#9ca3af",letterSpacing:3}}>AI STOCK INTELLIGENCE</div>
         </div>
       </div>
@@ -608,9 +608,9 @@ export default function App(){
 
         <div style={{padding:"16px 20px",display:"flex",flexDirection:"column",gap:20}}>
 
-          {/* TRADVIX Score + Radar */}
+          {/* FINTEL QUANTUM Score + Radar */}
           {sc&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16}}>
-            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>TRADVIX SCORE™ — PROPRIETARY AI RATING</div>
+            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>FINTEL QUANTUM SCORE™ — PROPRIETARY AI RATING</div>
             <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:14}}>
               <ScoreRing score={sc.total} size={72}/>
               <div style={{flex:1,minWidth:120}}>
@@ -798,7 +798,7 @@ export default function App(){
       {/* HEADER */}
       <div style={{background:N,padding:"0 16px",height:54,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:32,height:32,borderRadius:9,background:"#00e676",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:800,color:N}}>TX</div>
+          <div style={{width:32,height:32,borderRadius:9,background:"#00e676",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:800,color:N}}>&lt;FQ&gt;</div>
           <div style={{fontFamily:"system-ui",fontWeight:800,fontSize:18,color:"white",letterSpacing:1}}>TRAD<span style={{color:"#00e676"}}>VIX</span></div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -923,7 +923,7 @@ export default function App(){
             </div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:G}}>▲ GAINERS · TRADVIX SCORE™</span>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:G}}>▲ GAINERS · FINTEL QUANTUM SCORE™</span>
                 <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>TAP FOR AI ANALYSIS</span>
               </div>
               {gainers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
@@ -936,7 +936,7 @@ export default function App(){
             <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,fontWeight:600,marginBottom:8}}>▼ TOP LOSERS</div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:R}}>▼ LOSERS · TRADVIX SCORE™</span>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:R}}>▼ LOSERS · FINTEL QUANTUM SCORE™</span>
                 <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>ARIA MONITORS THESE</span>
               </div>
               {losers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
