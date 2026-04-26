@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
 
-function getToken(){return sessionStorage.getItem("tv_token");}
-function saveToken(t){sessionStorage.setItem("tv_token",t);}
+function getToken(){return localStorage.getItem("tv_token");}
+function saveToken(t){localStorage.setItem("tv_token",t);}
 function getUser(){
   try{
     const t=getToken();
@@ -15,7 +15,7 @@ function getUser(){
   }
 }
 function saveUser(u){}
-function logout(){sessionStorage.removeItem("tv_token");window.location.reload();}
+function logout(){localStorage.removeItem("tv_token");window.location.reload();}
 
 
 
@@ -48,7 +48,7 @@ function LandingPage({onGetStarted}){
 }
 
 function AuthScreen({ onAuth }) {
-  const [mode, setMode] = useState('signup');
+  const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
