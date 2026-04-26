@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const BACKEND = 'https://fintelquantum-backend.onrender.com';
+const BACKEND = 'https://tradvix-backend.onrender.com';
 
 function getToken(){return sessionStorage.getItem("tv_token");}
 function saveToken(t){sessionStorage.setItem("tv_token",t);}
