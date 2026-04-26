@@ -193,6 +193,20 @@ const STOCKS = [
 
 const IDXS = [{s:"SPY",n:"S&P 500"},{s:"QQQ",n:"NASDAQ"},{s:"DIA",n:"DOW"}];
 
+const SP500_TOP20 = [
+  {s:"AAPL",n:"Apple Inc",e:"🍎"},{s:"MSFT",n:"Microsoft",e:"🪟"},
+  {s:"NVDA",n:"NVIDIA",e:"⚡"},{s:"GOOGL",n:"Alphabet",e:"🔍"},
+  {s:"AMZN",n:"Amazon",e:"📦"},{s:"META",n:"Meta",e:"📘"},
+  {s:"TSLA",n:"Tesla",e:"🚗"},{s:"BRK-B",n:"Berkshire",e:"💰"},
+  {s:"LLY",n:"Eli Lilly",e:"🧬"},{s:"AVGO",n:"Broadcom",e:"🔧"},
+  {s:"JPM",n:"JPMorgan",e:"🏦"},{s:"V",n:"Visa",e:"💳"},
+  {s:"XOM",n:"Exxon Mobil",e:"🛢️"},{s:"UNH",n:"UnitedHealth",e:"🏥"},
+  {s:"MA",n:"Mastercard",e:"🔴"},{s:"JNJ",n:"Johnson & Johnson",e:"💊"},
+  {s:"WMT",n:"Walmart",e:"🛒"},{s:"PG",n:"Procter & Gamble",e:"🧼"},
+  {s:"HD",n:"Home Depot",e:"🔨"},{s:"COST",n:"Costco",e:"🏪"},
+];
+
+
 // ── SEEDED RNG ───────────────────────────────────────────────────
 function mkRng(seed){let h=0;for(const c of String(seed))h=(h*31+c.charCodeAt(0))>>>0;return()=>{h=(h*1664525+1013904223)>>>0;return h/4294967296;};}
 
@@ -935,7 +949,7 @@ export default function App(){
           </div>
 
           {/* Losers */}
-          <div style={{padding:"12px 16px 14px"}}>
+          <div style={{padding:"12px 16px 0"}}>
             <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,fontWeight:600,marginBottom:8}}>▼ TOP LOSERS</div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
@@ -944,6 +958,26 @@ export default function App(){
               </div>
               {losers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
               :losers.map((x,i)=><MRow key={i} item={x} rank={i+1} gain={false}/>)}
+            </div>
+          </div>
+
+          {/* Fortune 500 Top 20 */}
+          <div style={{padding:"12px 16px 14px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+              <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,fontWeight:600}}>🏆 S&P 500 — TOP 20</div>
+              <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",background:"#f3f4f6",borderRadius:20,padding:"2px 8px"}}>FORTUNE 500</div>
+            </div>
+            <div style={{...card}}>
+              <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:N}}>🏆 TOP 20 S&P 500 · FINTEL QUANTUM SCORE™</span>
+                <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>LARGEST US COMPANIES</span>
+              </div>
+              {SP500_TOP20.map((s,i)=>{
+                const q=data[s.s];
+                if(!q)return null;
+                const sc=scores[s.s];
+                return<SRow key={s.s} sym={s.s} name={s.n} q={q} sc={sc} rank={i+1} gain={q.dp>=0} emoji={s.e}/>;
+              })}
             </div>
           </div>
 
