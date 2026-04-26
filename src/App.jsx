@@ -27,7 +27,7 @@ function LandingPage({onGetStarted}){
   
   useEffect(()=>{
     const handler=(e)=>{
-      if(e.data==="fintelquantum_getstarted" && !calledRef.current){
+      if((e.data==="tradvix_getstarted"||e.data==="fintelquantum_getstarted") && !calledRef.current){
         calledRef.current=true;
         onGetStarted();
       }
