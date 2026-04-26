@@ -64,7 +64,7 @@ function AuthScreen({ onAuth }) {
     try{
       const endpoint=mode==='signup'?'/auth/signup':'/auth/login';
       const body=mode==='signup'?{name,email,password}:{email,password};
-      const res=await fetch('https://fintelquantum-backend.onrender.com'+endpoint,{
+      const res=await fetch('https://tradvix-backend.onrender.com'+endpoint,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(body)
