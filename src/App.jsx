@@ -561,7 +561,10 @@ export default function App(){
   // ── SPLASH ───────────────────────────────────────────────────
   // Auth gate
   if(!user){
-    if(!showAuth) return <LandingPage onGetStarted={()=>setShowAuth(true)}/>;
+    if(!showAuth) return <LandingPage onGetStarted={()=>{
+      window.history.pushState({page:'auth'},'','/?auth=1');
+      setShowAuth(true);
+    }}/>;
     return <AuthScreen onAuth={u=>{localStorage.setItem('tv_user',JSON.stringify(u));setUser(u);}}/>;
   }
 
@@ -792,8 +795,8 @@ export default function App(){
           </div>}
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-          <input value={chatInput} onChange={e=>setChatInput(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendChat()}
+          <input value={chatInput} onChange={e=>{e.stopPropagation();setChatInput(e.target.value);}}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
           <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
@@ -846,7 +849,7 @@ export default function App(){
               <div style={{flex:1}}>
                 <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:5}}>ARIA · AI ANALYST · DAILY BRIEF</div>
                 <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:"0 14px 14px 14px",padding:"11px 14px",fontSize:12,color:N,lineHeight:1.65,boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
-                  {ariaLines[ariaIdx]&&<TypeText text={ariaLines[ariaIdx]} speed={20}/>}
+                  {ariaLines[ariaIdx]&&<TypeText text={ariaLines[ariaIdx].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
                 </div>
                 {ariaLines.length>1&&<div style={{display:"flex",gap:4,marginTop:7}}>
                   {ariaLines.map((_,i)=><div key={i} style={{width:i===ariaIdx?14:4,height:3,borderRadius:2,background:i===ariaIdx?N:"#e5e7eb",transition:"width .3s"}}/>)}
