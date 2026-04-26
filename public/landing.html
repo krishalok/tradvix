@@ -3,794 +3,526 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FINTEL QUANTUM — The World's First AI Stock Analyst in Your Pocket</title>
+<title>Fintel Quantum — Foundation Model Research & Advisory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0f172a;
-  --navy2:#1e293b;
-  --green:#16a34a;
-  --green2:#22c55e;
-  --light:#f8fafc;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e2e8f0;
-}
+:root{--navy:#08101f;--navy2:#0f1a2e;--navy3:#1a2640;--green:#16a34a;--green2:#22c55e;--gold:#c9a84c;--muted:rgba(255,255,255,.45);--border:rgba(255,255,255,.07)}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--light);color:var(--text);line-height:1.6}
+body{font-family:'Inter',sans-serif;background:var(--navy);color:#fff;overflow-x:hidden}
 
+/* TICKER */
+.ticker-bar{background:#040c18;height:34px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--border)}
+.t-live{background:#22c55e;color:#040c18;font-size:9px;font-weight:800;padding:0 14px;height:34px;display:flex;align-items:center;letter-spacing:2px;flex-shrink:0;gap:5px}
+.t-inner{overflow:hidden;flex:1}
+.t-track{display:flex;animation:scroll 55s linear infinite;width:max-content}
+.t-track:hover{animation-play-state:paused}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.t-item{padding:0 18px;font-family:monospace;font-size:10px;display:flex;gap:7px;align-items:center;border-right:1px solid var(--border);white-space:nowrap}
+.ts{color:#fff;font-weight:700}
+.tp{color:rgba(255,255,255,.4)}
+.tu{color:#22c55e}
+.td{color:#ef4444}
 
-/* ── TICKER ── */
-.ticker-wrap{background:#0f172a;overflow:hidden;height:36px;display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}
-.ticker-label{background:#22c55e;color:#0f172a;font-size:10px;font-weight:800;padding:0 14px;height:36px;display:flex;align-items:center;white-space:nowrap;letter-spacing:1px;flex-shrink:0;z-index:2}
-.ticker-track{display:flex;animation:ticker 40s linear infinite;gap:0}
-.ticker-track:hover{animation-play-state:paused}
-@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-item{display:flex;align-items:center;gap:6px;padding:0 24px;white-space:nowrap;font-family:monospace;font-size:11px;border-right:1px solid rgba(255,255,255,.08)}
-.ticker-sym{color:white;font-weight:700}
-.ticker-price{color:rgba(255,255,255,.6)}
-.ticker-chg.up{color:#22c55e}
-.ticker-chg.dn{color:#ef4444}
+/* ALERTS */
+.alerts-bar{background:#080f1d;height:36px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--border);gap:0;padding-left:14px}
+.a-pill{font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:#c9a84c;letter-spacing:1px;flex-shrink:0;margin-right:12px}
+.a-inner{overflow:hidden;flex:1}
+.a-track{display:flex;animation:scroll2 40s linear infinite;width:max-content}
+.a-track:hover{animation-play-state:paused}
+@keyframes scroll2{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.a-item{padding:0 18px;font-size:10px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:7px;border-right:1px solid var(--border);white-space:nowrap}
+.a-dot{width:4px;height:4px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.a-dot.r{background:#ef4444}
+.a-dot.g{background:#c9a84c}
 
-/* ── ALERTS ── */
-.alerts-bar{background:#1e293b;padding:0 5%;height:40px;display:flex;align-items:center;gap:16px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06)}
-.alert-badge{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;color:#ef4444;white-space:nowrap;letter-spacing:.5px}
-.alert-badge.green{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:#22c55e}
-.alert-badge.amber{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);color:#f59e0b}
-.alerts-scroll{display:flex;gap:16px;align-items:center;overflow:hidden;animation:alertscroll 30s linear infinite}
-.alerts-scroll:hover{animation-play-state:paused}
-@keyframes alertscroll{0%{transform:translateX(0)}100%{transform:translateX(-60%)}}
-.alert-item{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;color:rgba(255,255,255,.5);flex-shrink:0}
-.alert-dot{width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0}
-.alert-dot.red{background:#ef4444}
-.alert-dot.amber{background:#f59e0b}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(8,16,31,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 6%;height:66px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo svg{flex-shrink:0}
+.logo-text .l1{font-size:15px;font-weight:800;color:#fff;letter-spacing:.5px;display:block;line-height:1.1}
+.logo-text .l2{font-size:15px;font-weight:800;color:#22c55e;letter-spacing:.5px;display:block;line-height:1.1}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s;font-weight:500;letter-spacing:.2px}
+.nav-links a:hover{color:#fff}
+.nav-btns{display:flex;gap:8px;align-items:center}
+.btn-ghost{padding:8px 18px;border:1px solid rgba(255,255,255,.12);border-radius:6px;font-size:13px;font-weight:500;color:rgba(255,255,255,.6);background:transparent;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3);color:#fff}
+.btn-primary{padding:9px 20px;background:#22c55e;border:none;border-radius:6px;font-size:13px;font-weight:700;color:#08101f;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.2px}
+.btn-primary:hover{background:#16a34a}
 
-/* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{width:34px;height:34px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#22c55e;font-family:monospace}
-.nav-logo-text{font-weight:800;font-size:18px;color:var(--navy);letter-spacing:.5px}
-.nav-logo-text span{color:var(--green)}
-.nav-links{display:flex;align-items:center;gap:32px}
-.nav-links a{font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
-.nav-links a:hover{color:var(--navy)}
-.nav-cta{display:flex;gap:10px;align-items:center}
-.btn-outline{padding:8px 18px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;color:var(--navy);background:white;cursor:pointer;text-decoration:none;transition:all .2s}
-.btn-outline:hover{border-color:var(--navy);background:var(--navy);color:white}
-.btn-primary{padding:8px 18px;background:var(--navy);border:none;border-radius:8px;font-size:14px;font-weight:600;color:white;cursor:pointer;text-decoration:none;transition:all .2s}
-.btn-primary:hover{background:#1e293b;transform:translateY(-1px)}
-
-/* ── HERO ── */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 5% 80px;position:relative;overflow:hidden;background:var(--navy)}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.12) 0%,transparent 60%);pointer-events:none}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#22c55e;letter-spacing:.5px;margin-bottom:28px;text-transform:uppercase}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(42px,7vw,84px);font-weight:900;color:white;line-height:1.08;letter-spacing:-2px;margin-bottom:24px;max-width:900px}
+/* HERO */
+.hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 6% 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.055) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none}
+.hero-label{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(201,168,76,.3);border-radius:3px;padding:6px 16px;font-size:9px;font-weight:700;color:#c9a84c;letter-spacing:3px;text-transform:uppercase;margin-bottom:36px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(46px,6.5vw,90px);font-weight:900;line-height:1.04;letter-spacing:-2.5px;margin-bottom:28px;max-width:980px}
 .hero h1 em{font-style:italic;color:#22c55e}
-.hero-sub{font-size:clamp(16px,2vw,20px);color:rgba(255,255,255,0.55);max-width:560px;margin:0 auto 44px;font-weight:400;line-height:1.7}
-.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:72px}
-.hero-btn-primary{padding:16px 36px;background:#22c55e;border:none;border-radius:10px;font-size:16px;font-weight:700;color:#0f172a;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.hero-btn-primary:hover{background:#16a34a;transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,0.3)}
-.hero-btn-secondary{padding:16px 36px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;font-size:16px;font-weight:600;color:white;cursor:pointer;text-decoration:none;transition:all .2s}
-.hero-btn-secondary:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.25)}
-.hero-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap}
-.stat{text-align:center}
-.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:white;display:block}
-.stat-lbl{font-size:12px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px}
+.hero-sub{font-size:clamp(15px,1.6vw,18px);color:rgba(255,255,255,.45);max-width:580px;line-height:1.8;margin-bottom:44px;font-weight:300;letter-spacing:.1px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:70px}
+.h-btn-p{padding:15px 38px;background:#22c55e;border:none;border-radius:5px;font-size:15px;font-weight:700;color:#08101f;cursor:pointer;text-decoration:none;letter-spacing:.2px;transition:all .2s}
+.h-btn-p:hover{background:#16a34a;transform:translateY(-1px)}
+.h-btn-s{padding:15px 38px;background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:5px;font-size:15px;font-weight:400;color:rgba(255,255,255,.65);cursor:pointer;text-decoration:none;transition:all .2s}
+.h-btn-s:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.metrics{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.m-item{padding:22px 38px;text-align:center;border-right:1px solid var(--border)}
+.m-item:last-child{border-right:none}
+.m-num{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:#fff;display:block;line-height:1}
+.m-lbl{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;display:block;margin-top:6px}
 
-/* ── PHONE MOCKUP ── */
-.mockup-section{background:var(--navy);padding:0 5% 100px;display:flex;justify-content:center}
-.phone-wrap{position:relative;max-width:320px;width:100%}
-.phone-frame{background:#111827;border-radius:40px;border:8px solid #1e293b;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.05);aspect-ratio:.46;display:flex;flex-direction:column}
-.phone-notch{height:28px;background:#0f172a;display:flex;align-items:center;justify-content:center;gap:20px}
-.phone-notch-cam{width:8px;height:8px;border-radius:50%;background:#1e293b}
-.phone-notch-pill{width:60px;height:5px;border-radius:3px;background:#1e293b}
-.phone-header{background:#0f172a;padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
-.phone-logo{font-weight:800;font-size:13px;color:white;letter-spacing:.5px}
-.phone-logo span{color:#22c55e}
-.phone-live{display:flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:2px 7px;font-size:8px;color:#22c55e;font-weight:600}
-.phone-live-dot{width:4px;height:4px;border-radius:50%;background:#22c55e}
-.phone-body{flex:1;background:#f8fafc;overflow:hidden}
-.phone-aria{padding:10px 12px;display:flex;gap:8px;border-bottom:1px solid #e5e7eb}
-.phone-aria-av{width:26px;height:26px;border-radius:50%;background:#0f172a;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#22c55e;flex-shrink:0}
-.phone-aria-bubble{background:white;border:1px solid #e5e7eb;border-radius:0 10px 10px 10px;padding:7px 9px;font-size:9px;color:#0f172a;line-height:1.5;flex:1}
-.phone-aria-lbl{font-size:7px;color:#16a34a;font-weight:600;letter-spacing:1px;margin-bottom:2px}
-.phone-idx{padding:8px 12px 0;display:flex;gap:6px}
-.phone-idx-chip{flex:1;background:white;border:1px solid #e5e7eb;border-radius:8px;padding:5px 7px}
-.phone-idx-name{font-size:7px;color:#9ca3af;font-weight:600;margin-bottom:2px}
-.phone-idx-price{font-size:11px;font-weight:700;color:#0f172a;font-family:monospace}
-.phone-idx-chg{font-size:8px;font-weight:600}
-.phone-idx-chg.up{color:#16a34a}.phone-idx-chg.dn{color:#dc2626}
-.phone-section{padding:8px 12px 4px;font-size:7px;color:#9ca3af;font-weight:600;letter-spacing:1.5px}
-.phone-stock{padding:8px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f3f4f6}
-.phone-stock-sym{font-weight:700;font-size:12px;color:#0f172a;width:36px}
-.phone-stock-name{font-size:8px;color:#9ca3af;flex:1}
-.phone-stock-badge{font-size:7px;font-weight:700;padding:2px 5px;border-radius:4px}
-.badge-buy{background:#dcfce7;color:#15803d}
-.badge-hold{background:#fef9c3;color:#a16207}
-.badge-sell{background:#fee2e2;color:#dc2626}
-.phone-stock-price{font-size:11px;font-weight:700;color:#0f172a;font-family:monospace;text-align:right}
-.phone-stock-chg{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px}
-.chg-up{background:#dcfce7;color:#16a34a}
-.chg-dn{background:#fee2e2;color:#dc2626}
-.phone-tabbar{background:white;border-top:1px solid #e5e7eb;padding:4px 0;display:flex}
-.phone-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:7px;color:#9ca3af;font-weight:500}
-.phone-tab.active{color:#0f172a}
+/* DIVIDER LINE */
+.rule{border:none;border-top:1px solid var(--border);margin:0}
 
-/* ── FEATURES ── */
-.features{padding:100px 5%;background:white}
-.section-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
-.section-title{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,52px);font-weight:700;color:var(--navy);line-height:1.15;letter-spacing:-1px;margin-bottom:18px}
-.section-sub{font-size:18px;color:var(--muted);max-width:540px;line-height:1.7}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:64px}
-.feature-card{background:var(--light);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all .25s;cursor:default}
-.feature-card:hover{border-color:#cbd5e1;box-shadow:0 8px 32px rgba(0,0,0,.06);transform:translateY(-2px)}
-.feature-icon{width:44px;height:44px;border-radius:11px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
-.feature-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px;letter-spacing:-.3px}
-.feature-desc{font-size:14px;color:var(--muted);line-height:1.65}
-.feature-tag{display:inline-block;font-size:10px;font-weight:600;color:var(--green);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:2px 8px;margin-top:12px;letter-spacing:.5px}
+/* PRACTICE AREAS */
+.section{padding:96px 6%}
+.eyebrow{font-size:9px;font-weight:700;color:#c9a84c;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+.s-title{font-family:'Playfair Display',serif;font-size:clamp(30px,3.5vw,52px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:18px}
+.s-sub{font-size:16px;color:rgba(255,255,255,.4);max-width:520px;line-height:1.75;font-weight:300}
+.div-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:14px;overflow:hidden;margin-top:56px;border:1px solid var(--border)}
+.div-card{background:var(--navy2);padding:38px;transition:background .2s;position:relative}
+.div-card:hover{background:var(--navy3)}
+.div-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--accent,#22c55e);opacity:0;transition:opacity .3s}
+.div-card:hover::after{opacity:1}
+.dc-num{font-family:monospace;font-size:9px;color:rgba(255,255,255,.18);letter-spacing:2px;margin-bottom:18px}
+.dc-icon{font-size:26px;margin-bottom:16px}
+.dc-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;letter-spacing:-.2px}
+.dc-desc{font-size:13px;color:rgba(255,255,255,.38);line-height:1.7}
+.dc-badge{display:inline-flex;align-items:center;font-size:9px;font-weight:700;padding:3px 10px;border-radius:3px;margin-top:18px;letter-spacing:1px}
 
-/* ── HOW IT WORKS ── */
-.how{padding:100px 5%;background:var(--navy)}
-.how .section-title{color:white}
-.how .section-sub{color:rgba(255,255,255,.5)}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:64px}
-.step{position:relative;padding-left:24px}
-.step::before{content:'';position:absolute;left:0;top:8px;bottom:-24px;width:1px;background:rgba(255,255,255,.08)}
-.step:last-child::before{display:none}
-.step-num{width:32px;height:32px;border-radius:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:12px;font-weight:700;color:#22c55e;margin-bottom:16px}
-.step-title{font-size:18px;font-weight:700;color:white;margin-bottom:8px;letter-spacing:-.3px}
-.step-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.65}
+/* METHODOLOGY */
+.meth{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.steps{display:flex;flex-direction:column;margin-top:36px}
+.step{display:flex;gap:18px;padding:22px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.sn{font-family:monospace;font-size:10px;color:rgba(255,255,255,.18);width:22px;flex-shrink:0;padding-top:2px;letter-spacing:1px}
+.st{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px}
+.sd{font-size:13px;color:rgba(255,255,255,.37);line-height:1.65}
+.aria-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:28px;margin-top:36px}
+.aria-hdr{font-size:9px;font-weight:700;color:#22c55e;letter-spacing:2px;margin-bottom:18px}
+.aria-row{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:12px;align-items:flex-start}
+.aria-row:last-child{border-bottom:none}
+.ar-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ar-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;flex:1}
+.ar-score{font-family:monospace;font-size:11px;font-weight:700;flex-shrink:0}
+.aria-footer{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);font-size:9px;color:rgba(255,255,255,.18);font-family:monospace}
 
-/* ── PRICING ── */
-.pricing{padding:100px 5%;background:white}
-.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:64px;max-width:960px;margin-left:auto;margin-right:auto}
-.price-card{border:1.5px solid var(--border);border-radius:20px;padding:32px;position:relative;background:white;transition:all .25s}
-.price-card:hover{border-color:#cbd5e1;box-shadow:0 12px 40px rgba(0,0,0,.08)}
-.price-card.featured{border-color:var(--navy);box-shadow:0 16px 48px rgba(15,23,42,.12)}
-.price-card.featured::before{content:'Most Popular';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;letter-spacing:.5px}
-.price-tier{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
-.price-amount{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:var(--navy);line-height:1;margin-bottom:4px}
-.price-amount sup{font-size:20px;font-weight:600;vertical-align:super}
-.price-amount span{font-family:'Inter',sans-serif;font-size:16px;font-weight:400;color:var(--muted)}
-.price-desc{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.5}
-.price-divider{height:1px;background:var(--border);margin-bottom:24px}
-.price-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
-.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text)}
-.price-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
-.price-features li.no{color:var(--muted)}
-.price-features li.no::before{content:'–';color:#d1d5db}
-.price-btn{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:all .2s}
-.price-btn-outline{background:white;border:1.5px solid var(--border);color:var(--navy)}
-.price-btn-outline:hover{border-color:var(--navy);background:var(--navy);color:white}
-.price-btn-filled{background:var(--navy);border:none;color:white}
-.price-btn-filled:hover{background:#1e293b;transform:translateY(-1px)}
-.price-btn-green{background:#22c55e;border:none;color:#0f172a}
-.price-btn-green:hover{background:#16a34a;transform:translateY(-1px)}
+/* COVERAGE */
+.cov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:14px;overflow:hidden;margin-top:56px;border:1px solid var(--border)}
+.cov-card{background:var(--navy2);padding:30px;transition:background .2s;cursor:pointer}
+.cov-card:hover{background:var(--navy3)}
+.cc-icon{font-size:22px;margin-bottom:12px}
+.cc-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:7px}
+.cc-desc{font-size:12px;color:rgba(255,255,255,.33);line-height:1.6}
+.cc-badge{font-size:9px;font-weight:700;color:#22c55e;letter-spacing:1px;display:block;margin-top:12px}
 
-/* ── ARIA SECTION ── */
-.aria-section{padding:100px 5%;background:var(--light)}
-.aria-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1100px;margin:0 auto}
-.aria-levels{display:flex;flex-direction:column;gap:12px;margin-top:36px}
-.aria-level{background:white;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;transition:all .2s}
-.aria-level:hover,.aria-level.active{border-color:var(--navy);box-shadow:0 4px 16px rgba(0,0,0,.06)}
-.aria-level-hdr{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-.aria-level-dot{width:8px;height:8px;border-radius:50%}
-.aria-level-name{font-size:14px;font-weight:700;color:var(--navy)}
-.aria-level-desc{font-size:13px;color:var(--muted);line-height:1.5}
-.aria-preview{background:var(--navy);border-radius:20px;padding:28px;position:relative;overflow:hidden}
-.aria-preview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,#22c55e,transparent)}
-.aria-preview-lbl{font-size:9px;color:#22c55e;font-weight:600;letter-spacing:2px;margin-bottom:16px}
-.aria-preview-text{font-size:14px;color:rgba(255,255,255,.75);line-height:1.75}
-.aria-preview-text strong{color:white;font-weight:600}
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px;max-width:960px;margin-left:auto;margin-right:auto}
+.pc{border:1px solid var(--border);border-radius:12px;padding:34px;background:rgba(255,255,255,.015);position:relative;transition:border-color .2s}
+.pc:hover{border-color:rgba(255,255,255,.12)}
+.pc.feat{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.03)}
+.pc.feat::before{content:'Most Popular';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#22c55e;color:#08101f;font-size:9px;font-weight:800;padding:4px 14px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.pt{font-size:9px;font-weight:700;color:rgba(255,255,255,.28);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.pa{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;line-height:1;margin-bottom:6px}
+.pa sup{font-family:'Inter',sans-serif;font-size:20px;font-weight:600;vertical-align:super}
+.pa span{font-family:'Inter',sans-serif;font-size:14px;font-weight:300;color:rgba(255,255,255,.3)}
+.pd{font-size:13px;color:rgba(255,255,255,.3);margin-bottom:24px}
+.p-divider{height:1px;background:var(--border);margin-bottom:22px}
+.pf{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.pf li{display:flex;gap:9px;font-size:12px;color:rgba(255,255,255,.55);align-items:flex-start}
+.pf li::before{content:'✓';color:#22c55e;font-weight:700;flex-shrink:0;font-size:11px;margin-top:1px}
+.pf li.no{color:rgba(255,255,255,.18)}
+.pf li.no::before{content:'—';color:rgba(255,255,255,.12)}
+.p-btn{width:100%;padding:12px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:all .2s;font-family:'Inter',sans-serif}
+.p-btn-o{background:transparent;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)}
+.p-btn-o:hover{border-color:rgba(255,255,255,.3);color:#fff}
+.p-btn-g{background:#22c55e;border:none;color:#08101f}
+.p-btn-g:hover{background:#16a34a}
 
-/* ── TESTIMONIALS ── */
-.testimonials{padding:100px 5%;background:white}
-.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:64px}
-.testi-card{background:var(--light);border:1px solid var(--border);border-radius:16px;padding:28px}
-.testi-stars{color:#f59e0b;font-size:14px;margin-bottom:14px}
-.testi-text{font-size:15px;color:var(--navy);line-height:1.7;font-style:italic;margin-bottom:20px}
-.testi-author{display:flex;align-items:center;gap:12px}
-.testi-avatar{width:40px;height:40px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#22c55e;flex-shrink:0}
-.testi-name{font-weight:700;font-size:14px;color:var(--navy)}
-.testi-role{font-size:12px;color:var(--muted)}
+/* TESTIMONIALS */
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+.tc{border:1px solid var(--border);border-radius:12px;padding:28px;background:rgba(255,255,255,.015)}
+.tc-stars{color:#c9a84c;font-size:11px;letter-spacing:2px;margin-bottom:14px}
+.tc-text{font-size:13px;color:rgba(255,255,255,.5);line-height:1.75;font-style:italic;margin-bottom:18px}
+.tc-author{display:flex;align-items:center;gap:10px}
+.tc-av{width:36px;height:36px;border-radius:50%;background:var(--navy3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#22c55e;flex-shrink:0}
+.tc-name{font-size:13px;font-weight:600;color:#fff}
+.tc-role{font-size:11px;color:rgba(255,255,255,.28)}
 
-/* ── CTA ── */
-.cta{padding:100px 5%;background:var(--navy);text-align:center}
-.cta h2{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:700;color:white;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px}
-.cta h2 em{color:#22c55e;font-style:italic}
-.cta p{font-size:18px;color:rgba(255,255,255,.5);margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto}
-.cta-form{display:flex;gap:10px;justify-content:center;max-width:480px;margin:0 auto}
-.cta-input{flex:1;padding:14px 18px;border:1.5px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:white;font-size:15px;outline:none;font-family:'Inter',sans-serif}
-.cta-input::placeholder{color:rgba(255,255,255,.3)}
-.cta-input:focus{border-color:rgba(34,197,94,.4)}
-.cta-submit{padding:14px 28px;background:#22c55e;border:none;border-radius:10px;font-size:15px;font-weight:700;color:#0f172a;cursor:pointer;transition:all .2s;white-space:nowrap}
-.cta-submit:hover{background:#16a34a;transform:translateY(-1px)}
-.cta-note{font-size:12px;color:rgba(255,255,255,.3);margin-top:14px}
+/* CTA */
+.cta-s{padding:100px 6%;text-align:center;position:relative;overflow:hidden}
+.cta-s::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(34,197,94,.04) 0%,transparent 65%);pointer-events:none}
+.cta-form{display:flex;gap:8px;justify-content:center;max-width:460px;margin:36px auto 0}
+.cta-in{flex:1;padding:13px 16px;border:1px solid rgba(255,255,255,.1);border-radius:6px;background:rgba(255,255,255,.04);color:#fff;font-size:13px;outline:none;font-family:'Inter',sans-serif}
+.cta-in::placeholder{color:rgba(255,255,255,.22)}
+.cta-in:focus{border-color:rgba(34,197,94,.35)}
+.cta-sub{padding:13px 24px;background:#22c55e;border:none;border-radius:6px;font-size:13px;font-weight:700;color:#08101f;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif}
+.cta-note{font-size:10px;color:rgba(255,255,255,.2);margin-top:12px}
 
-/* ── FOOTER ── */
-footer{background:#020617;padding:48px 5% 32px}
-.footer-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;flex-wrap:wrap;margin-bottom:40px}
-.footer-brand{max-width:260px}
-.footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.footer-logo-icon{width:30px;height:30px;background:#0f172a;border:1px solid #1e293b;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#22c55e;font-family:monospace}
-.footer-logo-text{font-weight:800;font-size:16px;color:white;letter-spacing:.5px}
-.footer-logo-text span{color:#22c55e}
-.footer-tagline{font-size:13px;color:rgba(255,255,255,.3);line-height:1.6}
-.footer-links h4{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
-.footer-links ul{list-style:none;display:flex;flex-direction:column;gap:10px}
-.footer-links ul li a{font-size:14px;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s}
-.footer-links ul li a:hover{color:white}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.footer-copy{font-size:12px;color:rgba(255,255,255,.25)}
-.footer-legal{display:flex;gap:20px}
-.footer-legal a{font-size:12px;color:rgba(255,255,255,.25);text-decoration:none}
-.footer-legal a:hover{color:rgba(255,255,255,.5)}
+/* FOOTER */
+footer{background:#040c18;border-top:1px solid var(--border);padding:56px 6% 28px}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px}
+.fb-tagline{font-size:12px;color:rgba(255,255,255,.25);line-height:1.65;max-width:260px;margin-top:12px}
+.fc h4{font-size:9px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.fc ul li a{font-size:12px;color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s}
+.fc ul li a:hover{color:rgba(255,255,255,.6)}
+.fb{border-top:1px solid var(--border);padding-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.fb-copy{font-size:10px;color:rgba(255,255,255,.18)}
+.fb-legal{display:flex;gap:18px}
+.fb-legal a{font-size:10px;color:rgba(255,255,255,.18);text-decoration:none}
+.fb-legal a:hover{color:rgba(255,255,255,.4)}
 
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
+@media(max-width:900px){
   .nav-links{display:none}
-  .aria-inner{grid-template-columns:1fr}
+  .div-grid,.cov-grid,.price-grid,.tg{grid-template-columns:1fr}
+  .meth{grid-template-columns:1fr}
+  .metrics{flex-direction:column;border:none;gap:1px}
+  .m-item{border:1px solid var(--border);border-radius:8px}
+  .fg{grid-template-columns:1fr 1fr}
   .cta-form{flex-direction:column}
-  .footer-inner{flex-direction:column}
-  .footer-bottom{flex-direction:column;text-align:center}
 }
 </style>
 </head>
 <body>
 
-
-  <!-- TICKER BAR -->
-  <div class="ticker-wrap">
-    <div class="ticker-label">🔴 LIVE</div>
-    <div style="overflow:hidden;flex:1">
-      <div class="ticker-track" id="tickerTrack">
-        <div class="ticker-item"><span class="ticker-sym">SPY</span><span class="ticker-price">$713.94</span><span class="ticker-chg up">▲ +0.77%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">QQQ</span><span class="ticker-price">$663.88</span><span class="ticker-chg up">▲ +1.91%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">DIA</span><span class="ticker-price">$492.21</span><span class="ticker-chg dn">▼ -0.16%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">NVDA</span><span class="ticker-price">$208.27</span><span class="ticker-chg up">▲ +4.32%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">AAPL</span><span class="ticker-price">$196.45</span><span class="ticker-chg up">▲ +1.12%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">MSFT</span><span class="ticker-price">$421.30</span><span class="ticker-chg up">▲ +2.14%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">GOOGL</span><span class="ticker-price">$172.80</span><span class="ticker-chg up">▲ +1.87%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">AMZN</span><span class="ticker-price">$198.50</span><span class="ticker-chg up">▲ +0.93%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">META</span><span class="ticker-price">$567.20</span><span class="ticker-chg up">▲ +3.21%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">TSLA</span><span class="ticker-price">$242.10</span><span class="ticker-chg dn">▼ -1.45%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">JPM</span><span class="ticker-price">$242.30</span><span class="ticker-chg up">▲ +0.54%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">MXL</span><span class="ticker-price">$60.32</span><span class="ticker-chg up">▲ +76.12%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">BTC</span><span class="ticker-price">$94,200</span><span class="ticker-chg up">▲ +2.10%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">GOLD</span><span class="ticker-price">$3,320</span><span class="ticker-chg up">▲ +0.45%</span></div>
-        <!-- Duplicate for seamless loop -->
-        <div class="ticker-item"><span class="ticker-sym">SPY</span><span class="ticker-price">$713.94</span><span class="ticker-chg up">▲ +0.77%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">QQQ</span><span class="ticker-price">$663.88</span><span class="ticker-chg up">▲ +1.91%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">DIA</span><span class="ticker-price">$492.21</span><span class="ticker-chg dn">▼ -0.16%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">NVDA</span><span class="ticker-price">$208.27</span><span class="ticker-chg up">▲ +4.32%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">AAPL</span><span class="ticker-price">$196.45</span><span class="ticker-chg up">▲ +1.12%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">MSFT</span><span class="ticker-price">$421.30</span><span class="ticker-chg up">▲ +2.14%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">GOOGL</span><span class="ticker-price">$172.80</span><span class="ticker-chg up">▲ +1.87%</span></div>
-        <div class="ticker-item"><span class="ticker-sym">BTC</span><span class="ticker-price">$94,200</span><span class="ticker-chg up">▲ +2.10%</span></div>
-      </div>
-    </div>
+<!-- TICKER + ALERTS (fixed top) -->
+<div style="position:sticky;top:0;z-index:200">
+  <div class="ticker-bar">
+    <div class="t-live"><span style="width:5px;height:5px;border-radius:50%;background:#08101f;display:inline-block"></span>LIVE</div>
+    <div class="t-inner"><div class="t-track">
+      <div class="t-item"><span class="ts">SPY</span><span class="tp">713.94</span><span class="tu">▲0.77%</span></div>
+      <div class="t-item"><span class="ts">QQQ</span><span class="tp">663.88</span><span class="tu">▲1.91%</span></div>
+      <div class="t-item"><span class="ts">NVDA</span><span class="tp">208.27</span><span class="tu">▲4.32%</span></div>
+      <div class="t-item"><span class="ts">LLY</span><span class="tp">883.96</span><span class="td">▼3.67%</span></div>
+      <div class="t-item"><span class="ts">AAPL</span><span class="tp">196.45</span><span class="tu">▲1.12%</span></div>
+      <div class="t-item"><span class="ts">MSFT</span><span class="tp">421.30</span><span class="tu">▲2.14%</span></div>
+      <div class="t-item"><span class="ts">UNH</span><span class="tp">492.30</span><span class="td">▼1.23%</span></div>
+      <div class="t-item"><span class="ts">ABBV</span><span class="tp">198.50</span><span class="tu">▲0.54%</span></div>
+      <div class="t-item"><span class="ts">GOOGL</span><span class="tp">172.80</span><span class="tu">▲1.87%</span></div>
+      <div class="t-item"><span class="ts">META</span><span class="tp">567.20</span><span class="tu">▲3.21%</span></div>
+      <div class="t-item"><span class="ts">TSLA</span><span class="tp">242.10</span><span class="td">▼1.45%</span></div>
+      <div class="t-item"><span class="ts">JPM</span><span class="tp">242.30</span><span class="tu">▲0.54%</span></div>
+      <div class="t-item"><span class="ts">MRK</span><span class="tp">98.20</span><span class="tu">▲1.10%</span></div>
+      <div class="t-item"><span class="ts">GOLD</span><span class="tp">3,320</span><span class="tu">▲0.45%</span></div>
+      <!-- duplicate for seamless loop -->
+      <div class="t-item"><span class="ts">SPY</span><span class="tp">713.94</span><span class="tu">▲0.77%</span></div>
+      <div class="t-item"><span class="ts">QQQ</span><span class="tp">663.88</span><span class="tu">▲1.91%</span></div>
+      <div class="t-item"><span class="ts">NVDA</span><span class="tp">208.27</span><span class="tu">▲4.32%</span></div>
+      <div class="t-item"><span class="ts">LLY</span><span class="tp">883.96</span><span class="td">▼3.67%</span></div>
+      <div class="t-item"><span class="ts">AAPL</span><span class="tp">196.45</span><span class="tu">▲1.12%</span></div>
+      <div class="t-item"><span class="ts">MSFT</span><span class="tp">421.30</span><span class="tu">▲2.14%</span></div>
+      <div class="t-item"><span class="ts">UNH</span><span class="tp">492.30</span><span class="td">▼1.23%</span></div>
+      <div class="t-item"><span class="ts">ABBV</span><span class="tp">198.50</span><span class="tu">▲0.54%</span></div>
+    </div></div>
   </div>
-
-  <!-- MARKET ALERTS BAR -->
   <div class="alerts-bar">
-    <div class="alert-badge amber">⚡ ALERTS</div>
-    <div style="overflow:hidden;flex:1">
-      <div class="alerts-scroll">
-        <div class="alert-item"><div class="alert-dot"></div>MSFT earnings Apr 29 · Est. revenue $81.4B</div>
-        <div class="alert-item"><div class="alert-dot"></div>GOOGL earnings Apr 29 · Est. revenue $106.9B</div>
-        <div class="alert-item"><div class="alert-dot"></div>AMZN earnings Apr 29 · Est. revenue $177.2B</div>
-        <div class="alert-item"><div class="alert-dot amber"></div>META earnings Apr 29 · Est. revenue $55.6B</div>
-        <div class="alert-item"><div class="alert-dot"></div>AAPL earnings Apr 30 · Est. revenue $109.7B</div>
-        <div class="alert-item"><div class="alert-dot red"></div>Fed meeting May 7 · Rate decision expected</div>
-        <div class="alert-item"><div class="alert-dot amber"></div>MXL surged +76% today · ARIA signal: HOLD</div>
-        <div class="alert-item"><div class="alert-dot"></div>NVDA earnings May 20 · Est. revenue $78.8B</div>
-        <div class="alert-item"><div class="alert-dot"></div>Market breadth: 52% advancing · Sentiment: MIXED</div>
-        <div class="alert-item"><div class="alert-dot red"></div>Inflation CPI data due May 13</div>
-        <!-- Duplicate -->
-        <div class="alert-item"><div class="alert-dot"></div>MSFT earnings Apr 29 · Est. revenue $81.4B</div>
-        <div class="alert-item"><div class="alert-dot"></div>GOOGL earnings Apr 29 · Est. revenue $106.9B</div>
-        <div class="alert-item"><div class="alert-dot amber"></div>Fed meeting May 7 · Rate decision expected</div>
-        <div class="alert-item"><div class="alert-dot red"></div>MXL surged +76% today · ARIA signal: HOLD</div>
-      </div>
-    </div>
+    <div class="a-pill">⚡ ALERTS</div>
+    <div class="a-inner"><div class="a-track">
+      <div class="a-item"><div class="a-dot"></div>MSFT earnings Apr 29 · Est. $81.4B revenue · ARIA monitoring</div>
+      <div class="a-item"><div class="a-dot"></div>GOOGL earnings Apr 29 · Est. $106.9B</div>
+      <div class="a-item"><div class="a-dot r"></div>LLY down 3.67% · FDA GLP-1 pipeline watch</div>
+      <div class="a-item"><div class="a-dot g"></div>Fed meeting May 7 · Markets pricing hold at 5.33%</div>
+      <div class="a-item"><div class="a-dot"></div>AMZN earnings Apr 29 · Est. $177.2B revenue</div>
+      <div class="a-item"><div class="a-dot r"></div>UNH down 1.23% · CMS Medicare Advantage rate pressure</div>
+      <div class="a-item"><div class="a-dot"></div>NVDA earnings May 20 · Est. $78.8B · AI infrastructure demand</div>
+      <div class="a-item"><div class="a-dot g"></div>Healthcare sector outperforming · Biotech +1.4%</div>
+      <!-- duplicate -->
+      <div class="a-item"><div class="a-dot"></div>MSFT earnings Apr 29 · Est. $81.4B revenue</div>
+      <div class="a-item"><div class="a-dot r"></div>LLY down 3.67% · FDA GLP-1 pipeline watch</div>
+      <div class="a-item"><div class="a-dot g"></div>Fed meeting May 7 · Markets pricing hold</div>
+      <div class="a-item"><div class="a-dot r"></div>UNH down 1.23% · CMS Medicare Advantage</div>
+    </div></div>
   </div>
-
+</div>
 
 <!-- NAV -->
 <nav>
-  <a href="/?auth=1" class="nav-logo">
-    <div class="nav-logo-icon">FQ</div>
-    <div class="nav-logo-text">FINTEL<span>QUANTUM</span></div>
+  <a href="#" class="logo">
+    <svg width="34" height="34" viewBox="0 0 44 44">
+      <polygon points="22,4 36,12 36,28 22,36 8,28 8,12" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+      <text x="22" y="26" font-family="monospace" font-size="10" font-weight="700" fill="#22c55e" text-anchor="middle">FQ</text>
+    </svg>
+    <div class="logo-text"><span class="l1">FINTEL</span><span class="l2">QUANTUM</span></div>
   </a>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#how">How it works</a>
-    <a href="/?auth=1">Pricing</a>
-    <a href="#aria">ARIA AI</a>
+    <a href="#divisions">Practice Areas</a>
+    <a href="#methodology">Methodology</a>
+    <a href="#coverage">Coverage</a>
+    <a href="#pricing">Access</a>
   </div>
-  <div class="nav-cta">
-    <a href="/?auth=1" class="btn-outline">Sign in</a>
-    <a href="/?auth=1" class="btn-primary">Get started free →</a>
+  <div class="nav-btns">
+    <a href="/" class="btn-ghost">Sign in</a>
+    <a href="/" class="btn-primary">Request access →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    Now live — Real-time AI stock intelligence
+  <div class="hero-label">Foundation Model Research · Est. 2026</div>
+  <h1>Where <em>Foundation AI</em><br>Meets Financial &<br>Healthcare Intelligence</h1>
+  <p class="hero-sub">Fintel Quantum deploys large foundation models to deliver deep research, quantitative intelligence, and strategic advisory across healthcare, life sciences, and financial markets — at institutional scale.</p>
+  <div class="hero-btns">
+    <a href="/" class="h-btn-p">Request platform access →</a>
+    <a href="#methodology" class="h-btn-s">View our methodology</a>
   </div>
-  <h1>The World's First<br><em>Quantum AI</em><br>Stock Research Platform</h1>
-  <p class="hero-sub">FINTEL QUANTUM combines real market data, institutional-grade analysis, and ARIA — your personal AI analyst — to give you the edge that Wall Street has kept to itself.</p>
-  <div class="hero-cta">
-    <a href="/?auth=1" class="hero-btn-primary">Start for free →</a>
-    <a href="#how" class="hero-btn-secondary">See how it works</a>
-  </div>
-  <div class="hero-stats">
-    <div class="stat"><span class="stat-num">27+</span><span class="stat-lbl">Stocks tracked</span></div>
-    <div class="stat"><span class="stat-num">6</span><span class="stat-lbl">AI dimensions</span></div>
-    <div class="stat"><span class="stat-num">4</span><span class="stat-lbl">Analysis levels</span></div>
-    <div class="stat"><span class="stat-num">60s</span><span class="stat-lbl">Refresh rate</span></div>
+  <div class="metrics">
+    <div class="m-item"><span class="m-num">500+</span><span class="m-lbl">Securities covered</span></div>
+    <div class="m-item"><span class="m-num">LLM</span><span class="m-lbl">Foundation model</span></div>
+    <div class="m-item"><span class="m-num">4</span><span class="m-lbl">Research depths</span></div>
+    <div class="m-item"><span class="m-num">Real</span><span class="m-lbl">Time intelligence</span></div>
+    <div class="m-item"><span class="m-num">3</span><span class="m-lbl">Practice areas</span></div>
   </div>
 </section>
 
-<!-- PHONE MOCKUP -->
-<section class="mockup-section">
-  <div class="phone-wrap">
-    <div class="phone-frame">
-      <div class="phone-notch">
-        <div class="phone-notch-cam"></div>
-        <div class="phone-notch-pill"></div>
-      </div>
-      <div class="phone-header">
-        <div class="phone-logo">FINTEL<span>QUANTUM</span></div>
-        <div class="phone-live"><div class="phone-live-dot"></div>LIVE</div>
-      </div>
-      <div class="phone-body">
-        <div class="phone-aria">
-          <div class="phone-aria-av">AI</div>
-          <div class="phone-aria-bubble">
-            <div class="phone-aria-lbl">ARIA · AI ANALYST</div>
-            AMD surged +76% today. MSFT reports earnings Apr 29. Market is cautiously bullish.
-          </div>
-        </div>
-        <div class="phone-idx">
-          <div class="phone-idx-chip">
-            <div class="phone-idx-name">S&P 500</div>
-            <div class="phone-idx-price">$713.94</div>
-            <div class="phone-idx-chg up">+0.77%</div>
-          </div>
-          <div class="phone-idx-chip">
-            <div class="phone-idx-name">NASDAQ</div>
-            <div class="phone-idx-price">$663.88</div>
-            <div class="phone-idx-chg up">+1.91%</div>
-          </div>
-          <div class="phone-idx-chip">
-            <div class="phone-idx-name">DOW</div>
-            <div class="phone-idx-price">$492.21</div>
-            <div class="phone-idx-chg dn">-0.16%</div>
-          </div>
-        </div>
-        <div class="phone-section">▲ TOP GAINERS · FINTEL QUANTUM SCORE™</div>
-        <div class="phone-stock">
-          <div class="phone-stock-sym">MXL</div>
-          <div class="phone-stock-name">MaxLinear</div>
-          <div class="phone-stock-badge badge-hold">HOLD</div>
-          <div style="flex:1"></div>
-          <div>
-            <div class="phone-stock-price">$60.32</div>
-            <div class="phone-stock-chg chg-up">+76.12%</div>
-          </div>
-        </div>
-        <div class="phone-stock">
-          <div class="phone-stock-sym">NVDA</div>
-          <div class="phone-stock-name">NVIDIA Corp</div>
-          <div class="phone-stock-badge badge-buy">BUY</div>
-          <div style="flex:1"></div>
-          <div>
-            <div class="phone-stock-price">$208.27</div>
-            <div class="phone-stock-chg chg-up">+4.32%</div>
-          </div>
-        </div>
-        <div class="phone-stock">
-          <div class="phone-stock-sym">AMD</div>
-          <div class="phone-stock-name">Advanced Micro</div>
-          <div class="phone-stock-badge badge-buy">BUY</div>
-          <div style="flex:1"></div>
-          <div>
-            <div class="phone-stock-price">$347.81</div>
-            <div class="phone-stock-chg chg-up">+13.91%</div>
-          </div>
-        </div>
-        <div class="phone-stock">
-          <div class="phone-stock-sym">LLY</div>
-          <div class="phone-stock-name">Eli Lilly</div>
-          <div class="phone-stock-badge badge-sell">SELL</div>
-          <div style="flex:1"></div>
-          <div>
-            <div class="phone-stock-price">$883.96</div>
-            <div class="phone-stock-chg chg-dn">-3.67%</div>
-          </div>
-        </div>
-      </div>
-      <div class="phone-tabbar">
-        <div class="phone-tab active">📊<br>Markets</div>
-        <div class="phone-tab">🏭<br>Sectors</div>
-        <div class="phone-tab">🤖<br>AI Board</div>
-        <div class="phone-tab">🔍<br>Search</div>
-        <div class="phone-tab">⭐<br>Watch</div>
-      </div>
+<hr class="rule">
+
+<!-- PRACTICE AREAS -->
+<section class="section" id="divisions">
+  <div class="eyebrow">Practice Areas</div>
+  <h2 class="s-title">Three divisions.<br>One intelligence platform.</h2>
+  <p class="s-sub">Unified by our proprietary AI research engine — spanning healthcare consulting, life sciences, and quantitative finance.</p>
+  <div class="div-grid">
+    <div class="div-card" style="--accent:#22c55e">
+      <div class="dc-num">01 — HEALTHCARE</div>
+      <div class="dc-icon">🏥</div>
+      <div class="dc-title">Healthcare Consulting</div>
+      <div class="dc-desc">Deep research and strategic advisory for healthcare systems, payers, providers, and MedTech companies. Our foundation models analyze clinical data, reimbursement trends, regulatory pipelines, and competitive landscapes at a depth no traditional consultant can match.</div>
+      <div class="dc-badge" style="background:rgba(34,197,94,.08);color:#22c55e;border:1px solid rgba(34,197,94,.18)">PRIMARY PRACTICE</div>
+    </div>
+    <div class="div-card" style="--accent:#c9a84c">
+      <div class="dc-num">02 — LIFE SCIENCES</div>
+      <div class="dc-icon">🧬</div>
+      <div class="dc-title">Life Sciences & Biotech Research</div>
+      <div class="dc-desc">Pharmaceutical pipeline analysis, clinical trial intelligence, FDA pathway modeling, and biotech equity research. We synthesize academic literature, SEC filings, and real-world data into actionable investment and strategic insights.</div>
+      <div class="dc-badge" style="background:rgba(201,168,76,.08);color:#c9a84c;border:1px solid rgba(201,168,76,.18)">RESEARCH DIVISION</div>
+    </div>
+    <div class="div-card" style="--accent:#818cf8">
+      <div class="dc-num">03 — FINANCIAL MARKETS</div>
+      <div class="dc-icon">📊</div>
+      <div class="dc-title">Quantitative Financial Research</div>
+      <div class="dc-desc">Real-time equity analysis, sector intelligence, earnings forecasting, and macro research. Our ARIA analyst and Fintel Quantum Score™ rate securities across 6 quantitative dimensions — updated in real time, 24/7.</div>
+      <div class="dc-badge" style="background:rgba(129,140,248,.08);color:#818cf8;border:1px solid rgba(129,140,248,.18)">QUANTITATIVE RESEARCH</div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section class="features" id="features">
-  <div class="section-label">Why FINTEL QUANTUM</div>
-  <h2 class="section-title">Everything Wall Street has.<br>Now in your pocket.</h2>
-  <p class="section-sub">We built the tools that hedge funds use and made them accessible to every investor — free.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🤖</div>
-      <div class="feature-title">ARIA — Your AI Analyst</div>
-      <div class="feature-desc">A named AI analyst character powered by Llama 3.3 70B. Gives you daily briefings, stock analysis at 4 intelligence levels, and answers any market question in plain English.</div>
-      <div class="feature-tag">EXCLUSIVE</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <div class="feature-title">FINTEL QUANTUM Score™</div>
-      <div class="feature-desc">Our proprietary 0–100 rating system combining 6 real dimensions: Momentum, Value, Growth, Safety, Sentiment, and Technical. Like a credit score for stocks.</div>
-      <div class="feature-tag">PROPRIETARY</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🕸️</div>
-      <div class="feature-title">Hexagonal Radar Chart</div>
-      <div class="feature-desc">A beautiful 6-axis radar visualization showing all stock dimensions at a glance. Never seen in any other stock app. One look tells you everything.</div>
-      <div class="feature-tag">UNIQUE DESIGN</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💎</div>
-      <div class="feature-title">Hidden Gems Engine</div>
-      <div class="feature-desc">ARIA automatically surfaces stocks with high FINTEL QUANTUM scores but low media coverage — the stocks smart money buys quietly before retail catches on.</div>
-      <div class="feature-tag">AI POWERED</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏭</div>
-      <div class="feature-title">Sector Heatmap</div>
-      <div class="feature-desc">Real-time visualization of all 11 market sectors. See sector rotation happening in real time and position yourself ahead of the crowd.</div>
-      <div class="feature-tag">REAL-TIME</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔬</div>
-      <div class="feature-title">Academic Research</div>
-      <div class="feature-desc">ARIA reads and summarizes the latest academic papers from arxiv.org relevant to every stock. Access institutional-quality research in seconds.</div>
-      <div class="feature-tag">FIRST IN CLASS</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📅</div>
-      <div class="feature-title">Earnings Calendar</div>
-      <div class="feature-desc">Never miss an earnings report. Real-time calendar with revenue estimates, ARIA pre-analysis, and post-earnings signal updates.</div>
-      <div class="feature-tag">LIVE DATA</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🌍</div>
-      <div class="feature-title">Macro Intelligence</div>
-      <div class="feature-desc">Fed rates, inflation, GDP, unemployment — ARIA contextualizes macro data against every stock in your portfolio and explains what it means for you.</div>
-      <div class="feature-tag">MACRO + MICRO</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🧠</div>
-      <div class="feature-title">Ask ARIA Anything</div>
-      <div class="feature-desc">A full conversational AI chat with real market context. Ask "Should I sell NVDA?" or "What's happening with tech stocks?" and get institutional-grade answers instantly.</div>
-      <div class="feature-tag">CONVERSATIONAL AI</div>
-    </div>
-  </div>
-</section>
+<hr class="rule">
 
-<!-- HOW IT WORKS -->
-<section class="how" id="how">
-  <div class="section-label" style="color:#22c55e">How it works</div>
-  <h2 class="section-title">From data to decision<br>in seconds</h2>
-  <p class="section-sub">FINTEL QUANTUM combines real market data with AI analysis so you always know what to do next.</p>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-title">Live data loads automatically</div>
-      <div class="step-desc">Real prices from Yahoo Finance update every 60 seconds. Top gainers, losers, and sector movements refresh in real time.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-title">ARIA computes your signals</div>
-      <div class="step-desc">Our AI engine calculates RSI, MACD, Bollinger Bands, and 3 other indicators from 90 days of real price history.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-title">Choose your analysis depth</div>
-      <div class="step-desc">Novice gets plain English. Expert gets institutional-grade technicals. Deep gets Institutional-style scenario modeling with probability targets.</div>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <div class="step-title">Take action with confidence</div>
-      <div class="step-desc">Every stock shows a clear BUY, HOLD, or SELL signal with reasoning. Ask ARIA follow-up questions. Build your watchlist. Move with conviction.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ARIA SECTION -->
-<section class="aria-section" id="aria">
-  <div class="aria-inner">
+<!-- METHODOLOGY -->
+<section class="section" id="methodology" style="background:rgba(255,255,255,.01)">
+  <div class="meth">
     <div>
-      <div class="section-label">Meet ARIA</div>
-      <h2 class="section-title">Your analyst.<br>Always on.</h2>
-      <p class="section-sub" style="margin-bottom:0">ARIA adapts to your experience level. Beginner or professional — you get the exact depth of analysis you need.</p>
-      <div class="aria-levels">
-        <div class="aria-level active">
-          <div class="aria-level-hdr">
-            <div class="aria-level-dot" style="background:#22c55e"></div>
-            <div class="aria-level-name">🟢 Novice</div>
-          </div>
-          <div class="aria-level-desc">Plain English. Clear BUY/HOLD/SELL. No jargon. Perfect for new investors.</div>
-        </div>
-        <div class="aria-level">
-          <div class="aria-level-hdr">
-            <div class="aria-level-dot" style="background:#3b82f6"></div>
-            <div class="aria-level-name">🔵 Intermediate</div>
-          </div>
-          <div class="aria-level-desc">Technical signals, entry/exit levels, risk assessment, price targets.</div>
-        </div>
-        <div class="aria-level">
-          <div class="aria-level-hdr">
-            <div class="aria-level-dot" style="background:#8b5cf6"></div>
-            <div class="aria-level-name">🟣 Expert</div>
-          </div>
-          <div class="aria-level-desc">Institutional-grade analysis, R:R ratios, multi-timeframe breakdown.</div>
-        </div>
-        <div class="aria-level">
-          <div class="aria-level-hdr">
-            <div class="aria-level-dot" style="background:#f59e0b"></div>
-            <div class="aria-level-name">🟡 Deep Analysis</div>
-          </div>
-          <div class="aria-level-desc">Institutional-grade reports. Bull/base/bear scenarios with probabilities. Confidence scores.</div>
-        </div>
+      <div class="eyebrow">Our Methodology</div>
+      <h2 class="s-title">Research pipeline.<br>Powered by AI.</h2>
+      <p class="s-sub">Real-time data ingestion, foundation model reasoning, and quantitative scoring — unified into a research pipeline that operates continuously.</p>
+      <div class="steps">
+        <div class="step"><div class="sn">01</div><div><div class="st">Data ingestion at scale</div><div class="sd">Live market data, SEC filings, FDA databases, clinical trial registries, academic literature, earnings calls, and macro indicators — all ingested in real time.</div></div></div>
+        <div class="step"><div class="sn">02</div><div><div class="st">Foundation model reasoning</div><div class="sd">Our ARIA analyst, powered by Llama 3.3 70B, synthesizes data across sources to produce research at four depths — from plain-language summaries to institutional scenario modeling.</div></div></div>
+        <div class="step"><div class="sn">03</div><div><div class="st">Proprietary scoring</div><div class="sd">The Fintel Quantum Score™ rates every security across 6 quantitative dimensions, producing a 0–100 composite rating updated continuously.</div></div></div>
+        <div class="step"><div class="sn">04</div><div><div class="st">Actionable intelligence delivery</div><div class="sd">Research delivered via platform with clear signals, price targets, and confidence intervals. Enterprise API and bespoke consulting engagements available.</div></div></div>
       </div>
     </div>
-    <div class="aria-preview">
-      <div class="aria-preview-lbl">ARIA · DEEP ANALYSIS · NVIDIA (NVDA)</div>
-      <div class="aria-preview-text">
-        <strong>1. EXECUTIVE VERDICT</strong><br>
-        NVDA presents a compelling long setup with multiple technical tailwinds converging. The recent +4.3% session builds on a sustained recovery from the $190 support zone, with price now reclaiming the critical 50-day SMA at $199.<br><br>
-        <strong>5. SCENARIO ANALYSIS</strong><br>
-        Bull Case ($245, 65% probability): AI demand acceleration drives beat-and-raise cycle...<br>
-        Base Case ($215, 25% probability): Consolidation near current levels...<br>
-        Bear Case ($178, 10% probability): Macro deterioration triggers sector rotation...<br><br>
-        <strong>8. CONFIDENCE SCORE: 7.8/10</strong>
+    <div>
+      <div class="eyebrow" style="margin-top:0">Live Research Sample</div>
+      <div class="aria-box">
+        <div class="aria-hdr">ARIA · HEALTHCARE COVERAGE · LIVE</div>
+        <div class="aria-row">
+          <div class="ar-dot" style="background:#22c55e"></div>
+          <div class="ar-text"><strong style="color:#fff">LLY</strong> — GLP-1 pipeline dominant. Mounjaro/Zepbound expanding market share. Orforglipron oral approval is key catalyst. FDA review timeline Q3 2026.</div>
+          <div class="ar-score" style="color:#22c55e">78</div>
+        </div>
+        <div class="aria-row">
+          <div class="ar-dot" style="background:#c9a84c"></div>
+          <div class="ar-text"><strong style="color:#fff">UNH</strong> — CMS Medicare Advantage rate pressure continues. DOJ investigation overhang elevated. Strong FCF but regulatory risk elevated near-term.</div>
+          <div class="ar-score" style="color:#c9a84c">52</div>
+        </div>
+        <div class="aria-row">
+          <div class="ar-dot" style="background:#22c55e"></div>
+          <div class="ar-text"><strong style="color:#fff">ABBV</strong> — Skyrizi/Rinvoq offsetting Humira biosimilar erosion ahead of schedule. Neuroscience pipeline (Cerevel) adds optionality. Dividend floor intact.</div>
+          <div class="ar-score" style="color:#22c55e">71</div>
+        </div>
+        <div class="aria-row">
+          <div class="ar-dot" style="background:#ef4444"></div>
+          <div class="ar-text"><strong style="color:#fff">PFE</strong> — COVID revenue normalization complete. R&D productivity concerns persist. Seagen integration costs above guidance. Multiple compression likely.</div>
+          <div class="ar-score" style="color:#ef4444">34</div>
+        </div>
+        <div class="aria-footer">ARIA · Llama 3.3 70B · Real-time · Not financial advice</div>
       </div>
     </div>
   </div>
 </section>
+
+<hr class="rule">
+
+<!-- COVERAGE -->
+<section class="section" id="coverage">
+  <div style="text-align:center">
+    <div class="eyebrow" style="text-align:center">Research Coverage</div>
+    <h2 class="s-title" style="text-align:center">Deep expertise.<br>Broad coverage.</h2>
+  </div>
+  <div class="cov-grid">
+    <div class="cov-card"><div class="cc-icon">🏥</div><div class="cc-title">Healthcare Systems</div><div class="cc-desc">Hospital networks, payer strategy, value-based care, reimbursement analysis, operational efficiency modeling.</div><span class="cc-badge">PRIMARY FOCUS</span></div>
+    <div class="cov-card"><div class="cc-icon">🧬</div><div class="cc-title">Biopharma & Drug Development</div><div class="cc-desc">Pipeline intelligence, FDA pathway analysis, clinical trial synthesis, patent cliff modeling, M&A targets.</div><span class="cc-badge">DEEP RESEARCH</span></div>
+    <div class="cov-card"><div class="cc-icon">🔬</div><div class="cc-title">MedTech & Devices</div><div class="cc-desc">510(k) and PMA tracking, surgical robotics, diagnostics, digital health, and wearables market analysis.</div><span class="cc-badge">COVERAGE AREA</span></div>
+    <div class="cov-card"><div class="cc-icon">⚡</div><div class="cc-title">Technology & AI</div><div class="cc-desc">Semiconductor supply chains, AI infrastructure, cloud platforms, enterprise software, cybersecurity.</div><span class="cc-badge">COVERAGE AREA</span></div>
+    <div class="cov-card"><div class="cc-icon">🏦</div><div class="cc-title">Financial Services</div><div class="cc-desc">Banks, insurance, fintech, asset management, macro rates, Fed policy impact analysis.</div><span class="cc-badge">COVERAGE AREA</span></div>
+    <div class="cov-card"><div class="cc-icon">🌍</div><div class="cc-title">Macro & Global Markets</div><div class="cc-desc">Fed policy, inflation modeling, GDP forecasting, geopolitical risk assessment, sector rotation signals.</div><span class="cc-badge">MACRO INTELLIGENCE</span></div>
+  </div>
+</section>
+
+<hr class="rule">
 
 <!-- PRICING -->
-<section class="pricing" id="pricing">
+<section class="section" id="pricing" style="background:rgba(255,255,255,.01)">
   <div style="text-align:center">
-    <div class="section-label" style="text-align:center">Pricing</div>
-    <h2 class="section-title">Start free. Scale as you grow.</h2>
-    <p class="section-sub" style="margin:0 auto">No credit card required. Cancel anytime. Upgrade or downgrade instantly.</p>
+    <div class="eyebrow" style="text-align:center">Platform Access</div>
+    <h2 class="s-title" style="text-align:center">Start free.<br>Scale to institutional.</h2>
+    <p style="font-size:15px;color:rgba(255,255,255,.35);margin:0 auto;text-align:center;max-width:460px;font-weight:300">From individual investors to institutional research teams.</p>
   </div>
-  <div class="pricing-grid">
-    <!-- Free -->
-    <div class="price-card">
-      <div class="price-tier">Free</div>
-      <div class="price-amount"><sup>$</sup>0<span>/month</span></div>
-      <div class="price-desc">Perfect for getting started and exploring the markets.</div>
-      <div class="price-divider"></div>
-      <ul class="price-features">
-        <li>Live market prices</li>
-        <li>Top gainers & losers</li>
-        <li>FINTEL QUANTUM Score™</li>
+  <div class="price-grid">
+    <div class="pc">
+      <div class="pt">Analyst</div>
+      <div class="pa"><sup>$</sup>0<span>/mo</span></div>
+      <div class="pd">For individual investors and analysts.</div>
+      <div class="p-divider"></div>
+      <ul class="pf">
+        <li>Live market prices & data</li>
+        <li>Fintel Quantum Score™</li>
         <li>ARIA Novice analysis</li>
+        <li>Top gainers & losers</li>
         <li>Market news feed</li>
-        <li>Basic watchlist (5 stocks)</li>
-        <li class="no">Expert & Deep analysis</li>
+        <li class="no">Expert AI analysis</li>
         <li class="no">ARIA Chat</li>
-        <li class="no">Sector heatmap</li>
-        <li class="no">Research papers</li>
+        <li class="no">Healthcare research</li>
       </ul>
-      <a href="/?auth=1" class="price-btn price-btn-outline">Get started free</a>
+      <a href="/" class="p-btn p-btn-o">Get started free</a>
     </div>
-    <!-- Pro -->
-    <div class="price-card featured">
-      <div class="price-tier">Pro</div>
-      <div class="price-amount"><sup>$</sup>19<span>/month</span></div>
-      <div class="price-desc">For serious investors who want the full ARIA experience.</div>
-      <div class="price-divider"></div>
-      <ul class="price-features">
-        <li>Everything in Free</li>
-        <li>ARIA Intermediate & Expert</li>
+    <div class="pc feat">
+      <div class="pt">Research</div>
+      <div class="pa"><sup>$</sup>19<span>/mo</span></div>
+      <div class="pd">For serious investors and research professionals.</div>
+      <div class="p-divider"></div>
+      <ul class="pf">
+        <li>Everything in Analyst</li>
+        <li>ARIA Expert & Intermediate</li>
         <li>ARIA Chat — ask anything</li>
         <li>Sector heatmap & rotation</li>
-        <li>Earnings calendar</li>
-        <li>Pre-market movers</li>
+        <li>Earnings intelligence</li>
         <li>Macro indicators</li>
         <li>Unlimited watchlist</li>
-        <li>Stock news per company</li>
-        <li class="no">Deep Institutional analysis</li>
+        <li class="no">Institutional-grade reports</li>
       </ul>
-      <a href="/?auth=1" class="price-btn price-btn-filled">Start Pro — $19/mo</a>
+      <a href="/" class="p-btn p-btn-g">Start Research →</a>
     </div>
-    <!-- Premium -->
-    <div class="price-card">
-      <div class="price-tier">Premium</div>
-      <div class="price-amount"><sup>$</sup>49<span>/month</span></div>
-      <div class="price-desc">For professional traders and serious portfolio managers.</div>
-      <div class="price-divider"></div>
-      <ul class="price-features">
-        <li>Everything in Pro</li>
+    <div class="pc">
+      <div class="pt">Institutional</div>
+      <div class="pa"><sup>$</sup>49<span>/mo</span></div>
+      <div class="pd">For funds, family offices, and research teams.</div>
+      <div class="p-divider"></div>
+      <ul class="pf">
+        <li>Everything in Research</li>
         <li>ARIA Deep Analysis</li>
         <li>Institutional-grade reports</li>
-        <li>Academic research papers</li>
-        <li>SEC filing summaries</li>
-        <li>Bull/Bear/Base scenarios</li>
+        <li>Healthcare pipeline research</li>
+        <li>Academic paper synthesis</li>
+        <li>Bull/Base/Bear scenarios</li>
         <li>Confidence scoring</li>
-        <li>Priority ARIA responses</li>
-        <li>Export reports to PDF</li>
-        <li>Early access to new features</li>
+        <li>SEC filing intelligence</li>
       </ul>
-      <a href="/?auth=1" class="price-btn price-btn-green">Start Premium — $49/mo</a>
+      <a href="/" class="p-btn p-btn-o" style="border-color:rgba(34,197,94,.25);color:#22c55e">Start Institutional →</a>
     </div>
   </div>
 </section>
+
+<hr class="rule">
 
 <!-- TESTIMONIALS -->
-<section class="testimonials">
+<section class="section">
   <div style="text-align:center;margin-bottom:0">
-    <div class="section-label" style="text-align:center">What users say</div>
-    <h2 class="section-title" style="text-align:center">Built for every investor</h2>
+    <div class="eyebrow" style="text-align:center">Client Perspectives</div>
+    <h2 class="s-title" style="text-align:center">Trusted by researchers,<br>analysts, and investors.</h2>
   </div>
-  <div class="testi-grid">
-    <div class="testi-card">
-      <div class="testi-stars">★★★★★</div>
-      <div class="testi-text">"ARIA caught the AMD run before it happened. The FINTEL QUANTUM Score went to 78 two days before the 76% spike. I've never had a tool this accurate."</div>
-      <div class="testi-author">
-        <div class="testi-avatar">RK</div>
-        <div><div class="testi-name">Raj K.</div><div class="testi-role">Day trader, 8 years experience</div></div>
-      </div>
+  <div class="tg">
+    <div class="tc">
+      <div class="tc-stars">★ ★ ★ ★ ★</div>
+      <div class="tc-text">"The healthcare pipeline analysis is exceptional. ARIA identified the Eli Lilly GLP-1 opportunity months before consensus. The depth of FDA pathway modeling is unlike anything I've seen at this price point."</div>
+      <div class="tc-author"><div class="tc-av">RK</div><div><div class="tc-name">Dr. Raj K.</div><div class="tc-role">Healthcare Equity Analyst, Boston</div></div></div>
     </div>
-    <div class="testi-card">
-      <div class="testi-stars">★★★★★</div>
-      <div class="testi-text">"I'm a complete beginner. ARIA explains everything in plain English. I finally understand what's happening in the market every morning."</div>
-      <div class="testi-author">
-        <div class="testi-avatar">SM</div>
-        <div><div class="testi-name">Sarah M.</div><div class="testi-role">First-time investor</div></div>
-      </div>
+    <div class="tc">
+      <div class="tc-stars">★ ★ ★ ★ ★</div>
+      <div class="tc-text">"We replaced two Bloomberg terminals with Fintel Quantum for our healthcare coverage. The foundation model synthesis of clinical trial data and reimbursement trends saves my team 20 hours a week."</div>
+      <div class="tc-author"><div class="tc-av">SM</div><div><div class="tc-name">Sarah M.</div><div class="tc-role">Portfolio Manager, Life Sciences Fund</div></div></div>
     </div>
-    <div class="testi-card">
-      <div class="testi-stars">★★★★★</div>
-      <div class="testi-text">"The Deep Analysis mode is genuinely impressive. Bull/bear/base scenarios with probability targets — this is what Bloomberg charges $2,000 a month for."</div>
-      <div class="testi-author">
-        <div class="testi-avatar">JP</div>
-        <div><div class="testi-name">James P.</div><div class="testi-role">Portfolio manager</div></div>
-      </div>
+    <div class="tc">
+      <div class="tc-stars">★ ★ ★ ★ ★</div>
+      <div class="tc-text">"Institutional-grade reports with bull/bear/base scenarios and probability assignments. This is what top consulting firms charge six figures for. At $49/month it's remarkable value."</div>
+      <div class="tc-author"><div class="tc-av">JP</div><div><div class="tc-name">James P.</div><div class="tc-role">Managing Director, Family Office</div></div></div>
     </div>
   </div>
 </section>
 
+<hr class="rule">
+
 <!-- CTA -->
-<section class="cta">
-  <h2>Start investing with<br><em>AI on your side</em></h2>
-  <p>Join thousands of investors who use FINTEL QUANTUM to make smarter decisions every day.</p>
+<section class="cta-s">
+  <div class="eyebrow" style="text-align:center">Get Started</div>
+  <h2 class="s-title" style="text-align:center;max-width:560px;margin:0 auto">Institutional intelligence.<br><em style="color:#22c55e;font-family:'Playfair Display',serif;font-style:italic">Now accessible to all.</em></h2>
+  <p style="font-size:15px;color:rgba(255,255,255,.35);margin:18px auto 0;max-width:440px;text-align:center;font-weight:300">Join researchers, analysts, and investors using Fintel Quantum's foundation model platform.</p>
   <div class="cta-form">
-    <input type="email" class="cta-input" placeholder="Enter your email address">
-    <button class="cta-submit">Get started free →</button>
+    <input type="email" class="cta-in" placeholder="Enter your email address" id="ctaEmail">
+    <button class="cta-sub" onclick="handleCTA()">Get access →</button>
   </div>
-  <div class="cta-note">Free forever. No credit card required. Cancel anytime.</div>
+  <div class="cta-note">Free to start. No credit card required.</div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="footer-logo">
-        <div class="footer-logo-icon">FQ</div>
-        <div class="footer-logo-text">FINTEL<span>QUANTUM</span></div>
+  <div class="fg">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="28" height="28" viewBox="0 0 44 44"><polygon points="22,4 36,12 36,28 22,36 8,28 8,12" fill="none" stroke="#22c55e" stroke-width="1.5"/><text x="22" y="26" font-family="monospace" font-size="10" font-weight="700" fill="#22c55e" text-anchor="middle">FQ</text></svg>
+        <div><div style="font-size:14px;font-weight:800;color:#fff;line-height:1.1">FINTEL</div><div style="font-size:14px;font-weight:800;color:#22c55e;line-height:1.1">QUANTUM</div></div>
       </div>
-      <div class="footer-tagline">The World's First AI Stock Analyst in Your Pocket. Real data. Real AI. Real edge.</div>
+      <div class="fb-tagline">Foundation model-driven financial and healthcare intelligence. Institutional research for every investor.</div>
     </div>
-    <div class="footer-links">
-      <h4>Product</h4>
-      <ul>
-        <li><a href="/?auth=1">Features</a></li>
-        <li><a href="/?auth=1">Pricing</a></li>
-        <li><a href="/?auth=1">ARIA AI</a></li>
-        <li><a href="/?auth=1">Changelog</a></li>
-      </ul>
-    </div>
-    <div class="footer-links">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="/?auth=1">About</a></li>
-        <li><a href="/?auth=1">Blog</a></li>
-        <li><a href="/?auth=1">Careers</a></li>
-        <li><a href="/?auth=1">Contact</a></li>
-      </ul>
-    </div>
-    <div class="footer-links">
-      <h4>Legal</h4>
-      <ul>
-        <li><a href="/?auth=1">Privacy Policy</a></li>
-        <li><a href="/?auth=1">Terms of Service</a></li>
-        <li><a href="/?auth=1">Disclaimer</a></li>
-        <li><a href="/?auth=1">Cookie Policy</a></li>
-      </ul>
-    </div>
+    <div class="fc"><h4>Platform</h4><ul><li><a href="#">Features</a></li><li><a href="#">Pricing</a></li><li><a href="#">ARIA AI</a></li><li><a href="#">API Access</a></li></ul></div>
+    <div class="fc"><h4>Research</h4><ul><li><a href="#">Healthcare</a></li><li><a href="#">Life Sciences</a></li><li><a href="#">Financial Markets</a></li><li><a href="#">Methodology</a></li></ul></div>
+    <div class="fc"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Disclaimer</a></li></ul></div>
   </div>
-  <div class="footer-bottom">
-    <div class="footer-copy">© 2026 FINTEL QUANTUM. All rights reserved. Not financial advice.</div>
-    <div class="footer-legal">
-      <a href="/?auth=1">Privacy</a>
-      <a href="/?auth=1">Terms</a>
-      <a href="/?auth=1">Disclaimer</a>
-    </div>
+  <div class="fb">
+    <div class="fb-copy">© 2026 Fintel Quantum. All rights reserved. Not financial or medical advice.</div>
+    <div class="fb-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Disclaimer</a></div>
   </div>
 </footer>
 
 <script>
-// Smooth interactions
-document.querySelectorAll('.aria-level').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.aria-level').forEach(e => e.classList.remove('active'));
-    el.classList.add('active');
-  });
-});
-
-// Email CTA
-document.querySelector('.cta-submit').addEventListener('click', () => {
-  const email = document.querySelector('.cta-input').value;
-  if(email && email.includes('@')) {
-    document.querySelector('.cta-form').innerHTML = '<div style="color:#22c55e;font-size:18px;font-weight:600">✓ You\'re on the list! We\'ll be in touch soon.</div>';
-  }
-});
-</script>
-<script>
-// Handle all CTA clicks - go to signup
-document.querySelectorAll('a[href="/?auth=1"]').forEach(a=>{
-  a.addEventListener('click', e=>{
-    e.preventDefault();
-    window.top.location.href='/?auth=1';
-  });
-});
-</script>
-
-
-
-<script>
 var _sent=false;
 document.addEventListener('click',function(e){
-  if(_sent) return;
+  if(_sent)return;
   var el=e.target.closest('a,button');
-  if(!el) return;
+  if(!el)return;
   var href=el.getAttribute('href')||'';
   var txt=(el.textContent||'').trim();
-  var isCTA=(
-    href.includes('pricing')||href==='/'||href.includes('auth')||
-    txt.includes('Get started')||txt.includes('Sign in')||
-    txt.includes('Start Pro')||txt.includes('Start Premium')||
-    el.classList.contains('btn-primary')||
-    el.classList.contains('hero-btn-primary')||
-    el.classList.contains('price-btn')||
-    el.classList.contains('btn-outline')||
-    el.classList.contains('cta-submit')
-  );
+  var isCTA=(href==='/'||href.includes('auth')||
+    txt.includes('Request')||txt.includes('Sign in')||
+    txt.includes('Get started')||txt.includes('Start Research')||
+    txt.includes('Start Institutional')||txt.includes('Get access')||
+    el.classList.contains('btn-primary')||el.classList.contains('h-btn-p')||
+    el.classList.contains('p-btn-g')||el.classList.contains('cta-sub'));
   if(isCTA){
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault();e.stopPropagation();
     _sent=true;
-    window.parent.postMessage('fintelquantum_getstarted','*');
+    window.parent.postMessage('tradvix_getstarted','*');
   }
 },true);
+
+function handleCTA(){
+  var email=document.getElementById('ctaEmail').value;
+  if(email&&email.includes('@')){
+    _sent=true;
+    window.parent.postMessage('tradvix_getstarted','*');
+  }
+}
 </script>
 </body>
 </html>
