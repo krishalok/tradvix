@@ -974,8 +974,18 @@ export default function App(){
               </div>
               {SP500_TOP20.map((s,i)=>{
                 const q=data[s.s];
-                if(!q)return null;
                 const sc=scores[s.s];
+                if(!q)return(
+                  <div key={s.s} style={{padding:"12px 16px",borderBottom:"1px solid #f3f4f6",display:"flex",alignItems:"center",gap:12,opacity:.4}}>
+                    <div style={{fontFamily:"monospace",fontSize:10,color:"#d1d5db",width:18}}>{i+1}</div>
+                    <div style={{fontSize:18}}>{s.e}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,fontSize:15}}>{s.s}</div>
+                      <div style={{fontSize:10,color:"#9ca3af"}}>{s.n}</div>
+                    </div>
+                    <div style={{fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
+                  </div>
+                );
                 return<SRow key={s.s} sym={s.s} name={s.n} q={q} sc={sc} rank={i+1} gain={q.dp>=0} emoji={s.e}/>;
               })}
             </div>
