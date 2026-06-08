@@ -1,25 +1,3 @@
-
-const ChatInput=React.memo(({onSend,disabled,sheet})=>{
-  const ref=React.useRef(null);
-  const send=()=>{
-    const v=ref.current?.value||'';
-    if(v.trim()&&!disabled){
-      onSend(v);
-      ref.current.value='';
-      ref.current.focus();
-    }
-  };
-  return(
-    <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-      <input ref={ref} autoFocus
-        onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
-        placeholder={`Ask ARIA about ${sheet||"the market"}...`}
-        style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:14,color:"#0f172a",outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
-      <button onClick={send} disabled={disabled}
-        style={{width:42,height:42,borderRadius:"50%",background:"#0f172a",border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
-    </div>
-  );
-});
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
@@ -371,7 +349,6 @@ export default function App(){
   const [chatOpen,setChatOpen]=useState(false);
   const [chatHistory,setChatHistory]=useState([]);
   const [chatInput,setChatInput]=useState("");
-  const chatInputRef=useRef(null);
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
@@ -502,16 +479,6 @@ export default function App(){
   };
 
   // ── CHAT ─────────────────────────────────────────────────────
-  const sendChatDirect=async(msg)=>{
-    if(!msg?.trim())return;
-    const newHistory=[...chatHistory,{role:"user",content:msg}];
-    setChatHistory(newHistory);setChatLoading(true);
-    try{
-      const r=await apiPost('/api/chat',{message:msg,symbol:sheet,history:chatHistory.slice(-6)});
-      setChatHistory(h=>[...h,{role:"assistant",content:r.response}]);
-    }catch(e){setChatHistory(h=>[...h,{role:"assistant",content:"Sorry, I couldn't process that."}]);}
-    finally{setChatLoading(false);}
-  };
   const sendChat=async()=>{
     if(!chatInput.trim())return;
     const msg=chatInput.trim();setChatInput("");
@@ -827,7 +794,14 @@ export default function App(){
             <div style={{width:6,height:6,borderRadius:"50%",background:"#d1d5db",animation:"blink 1s .4s infinite"}}/>
           </div>}
         </div>
-        <ChatInput onSend={sendChatDirect} disabled={chatLoading} sheet={sheet}/>
+        <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
+          <input value={chatInput} onChange={e=>{e.stopPropagation();setChatInput(e.target.value);}}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
+            placeholder={`Ask about ${sheet||"the market"}...`}
+            style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
+          <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
+            style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
+        </div>
       </div>
     </div>;
   };
@@ -1152,4 +1126,3 @@ export default function App(){
   );
 }
 // Sun Apr 26 01:35:31 EDT 2026
-// Mon Jun  8 00:12:21 EDT 2026
