@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import AriaChat from "./AriaChat";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
 
@@ -348,7 +349,7 @@ export default function App(){
   const [aiLoading,setAiLoading]=useState(false);
   const [chatOpen,setChatOpen]=useState(false);
   const [chatHistory,setChatHistory]=useState([]);
-  const [chatInput,setChatInput]=useState("");
+
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
