@@ -342,15 +342,13 @@ export default function App(){
   const [srch,setSrch]=useState("");
   const [toast,setToast]=useState(null);
   const [ariaLines,setAriaLines]=useState([]);
-  const ariaIdxRef=useRef(0);
-  const [ariaDisplay,setAriaDisplay]=useState(0);
+  const [ariaIdx,setAriaIdx]=useState(0);
   const [aiLevel,setAiLevel]=useState("novice");
   const [aiAnalysis,setAiAnalysis]=useState({});
   const [aiLoading,setAiLoading]=useState(false);
   const [chatOpen,setChatOpen]=useState(false);
   const [chatHistory,setChatHistory]=useState([]);
   const [chatInput,setChatInput]=useState("");
-  const chatInputRef=useRef(null);
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
@@ -429,7 +427,7 @@ export default function App(){
   },[]);
 
   // ── ARIA CYCLE ───────────────────────────────────────────────
-  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>{ariaIdxRef.current=(ariaIdxRef.current+1)%ariaLines.length;setAriaDisplay(ariaIdxRef.current);},8000);return()=>clearInterval(id);},[ariaLines]);
+  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>setAriaIdx(i=>(i+1)%ariaLines.length),8000);return()=>clearInterval(id);},[ariaLines]);
 
   // ── AUTO REFRESH ─────────────────────────────────────────────
   useEffect(()=>{
@@ -482,9 +480,8 @@ export default function App(){
 
   // ── CHAT ─────────────────────────────────────────────────────
   const sendChat=async()=>{
-    const msg=(chatInputRef.current?.value||'').trim();
-    if(!msg)return;
-    if(chatInputRef.current)chatInputRef.current.value='';
+    if(!chatInput.trim())return;
+    const msg=chatInput.trim();setChatInput("");
     const newHistory=[...chatHistory,{role:"user",content:msg}];
     setChatHistory(newHistory);setChatLoading(true);
     try{
@@ -798,11 +795,11 @@ export default function App(){
           </div>}
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-          <input ref={chatInputRef}
-            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}
+          <input value={chatInput} onChange={e=>{e.stopPropagation();setChatInput(e.target.value);}}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
-          <button onClick={sendChat} disabled={chatLoading}
+          <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
             style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
         </div>
       </div>
@@ -852,7 +849,7 @@ export default function App(){
               <div style={{flex:1}}>
                 <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:5}}>ARIA · AI ANALYST · DAILY BRIEF</div>
                 <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:"0 14px 14px 14px",padding:"11px 14px",fontSize:12,color:N,lineHeight:1.65,boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
-                  {ariaLines[ariaDisplay]&&<TypeText text={ariaLines[ariaDisplay].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
+                  {ariaLines[ariaIdx]&&<TypeText text={ariaLines[ariaIdx].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
                 </div>
                 {ariaLines.length>1&&<div style={{display:"flex",gap:4,marginTop:7}}>
                   {ariaLines.map((_,i)=><div key={i} style={{width:i===ariaIdx?14:4,height:3,borderRadius:2,background:i===ariaIdx?N:"#e5e7eb",transition:"width .3s"}}/>)}
