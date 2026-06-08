@@ -629,23 +629,23 @@ export default function App(){
           {sc&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16}}>
             <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>FQ INTELLIGENCE SCORE™ — PROPRIETARY AI RATING</div>
             <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:14}}>
-              <ScoreRing score={sc.total} size={72}/>
+              <ScoreRing score={sc.total} size={90}/>
               <div style={{flex:1,minWidth:120}}>
                 <Badge sc={sc} big={true}/>
                 <div style={{fontSize:12,color:"#6b7280",lineHeight:1.5,marginTop:8}}>{sc.brief}</div>
               </div>
-              <Radar dims={sc.dims} size={130}/>
+              <Radar dims={sc.dims} size={180}/>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px 16px"}}>
               {Object.entries(sc.dims).map(([k,v])=>{
                 const col=v>=65?G:v>=45?A:R;
                 return<div key={k}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:1,textTransform:"uppercase"}}>{k}</span>
-                    <span style={{fontFamily:"monospace",fontSize:8,color:col,fontWeight:700}}>{v}</span>
+                    <span style={{fontFamily:"monospace",fontSize:10,color:"#374151",letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>{k}</span>
+                    <span style={{fontFamily:"monospace",fontSize:11,color:col,fontWeight:700}}>{v}</span>
                   </div>
-                  <div style={{height:4,background:"#f3f4f6",borderRadius:2,overflow:"hidden"}}>
-                    <div style={{height:"100%",width:v+"%",background:col,borderRadius:2}}/>
+                  <div style={{height:7,background:"#f3f4f6",borderRadius:4,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:v+"%",background:col,borderRadius:4}}/>
                   </div>
                 </div>;
               })}
@@ -667,7 +667,7 @@ export default function App(){
                     }}>{l}</button>
                   ))}
                 </div>
-                <div style={{background:"#f9fafb",borderRadius:10,padding:"12px 14px",fontSize:12,color:N,lineHeight:1.7,minHeight:80,fontFamily:"system-ui",whiteSpace:"pre-wrap"}}>
+                <div style={{background:"#f9fafb",borderRadius:12,padding:"16px 18px",fontSize:14,color:N,lineHeight:1.8,minHeight:120,fontFamily:"system-ui",whiteSpace:"pre-wrap"}}>
                   {aiLoading?<span style={{color:"#9ca3af"}}>ARIA is analyzing {sheet}...<span style={{display:"inline-block",width:2,height:"1em",background:G,verticalAlign:"text-bottom",marginLeft:2,animation:"blink 1s step-end infinite"}}/></span>
                   :aiAnalysis[aiKey]?aiAnalysis[aiKey]
                   :<span style={{color:"#9ca3af"}}>Tap a level above to get AI analysis powered by Llama 3.3 70B</span>}
@@ -679,7 +679,7 @@ export default function App(){
 
           {/* Research Estimates */}
           {sc?.targets&&<div>
-            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>🎯 AI PRICE TARGETS</div>
+            <div style={{fontFamily:"monospace",fontSize:10,color:"#6b7280",letterSpacing:2,fontWeight:600,marginBottom:12}}>📊 RESEARCH ESTIMATES</div>
             <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:3}}>
               {Object.entries(sc.targets).map(([p,t])=>{
                 const ret=((t-q.c)/q.c*100),col=ret>=0?G:R;
@@ -694,7 +694,7 @@ export default function App(){
 
           {/* Key Metrics */}
           <div>
-            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📊 LIVE MARKET DATA</div>
+            <div style={{fontFamily:"monospace",fontSize:10,color:"#6b7280",letterSpacing:2,fontWeight:600,marginBottom:12}}>📊 LIVE MARKET DATA</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
               {[
                 {l:"OPEN",v:fp(q.o)},{l:"HIGH",v:fp(q.h),c:G},{l:"LOW",v:fp(q.l),c:R},
@@ -704,9 +704,9 @@ export default function App(){
                 {l:"MACD",v:sc?.macd?sc.macd+"":"--",c:sc?.macd?sc.macd>0?G:R:undefined},
                 {l:"BETA",v:q.beta?q.beta.toFixed(2):"N/A"},
               ].map(m=>(
-                <div key={m.l} style={{background:"white",border:"1px solid #f3f4f6",borderRadius:11,padding:"9px 11px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
-                  <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:1.2,marginBottom:5}}>{m.l}</div>
-                  <div style={{fontFamily:"monospace",fontSize:12,fontWeight:700,color:m.c||N}}>{m.v}</div>
+                <div key={m.l} style={{background:"white",border:"1px solid #f3f4f6",borderRadius:12,padding:"13px 14px",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
+                  <div style={{fontFamily:"monospace",fontSize:9,color:"#6b7280",letterSpacing:1.2,marginBottom:6,fontWeight:600}}>{m.l}</div>
+                  <div style={{fontFamily:"monospace",fontSize:15,fontWeight:700,color:m.c||N}}>{m.v}</div>
                 </div>
               ))}
             </div>
@@ -714,7 +714,7 @@ export default function App(){
 
           {/* Stock News */}
           {sNews.length>0&&<div>
-            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📰 LATEST NEWS</div>
+            <div style={{fontFamily:"monospace",fontSize:10,color:"#6b7280",letterSpacing:2,fontWeight:600,marginBottom:12}}>📰 LATEST NEWS</div>
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {sNews.slice(0,4).map((n,i)=>(
                 <div key={i} onClick={()=>window.open(n.url,"_blank")} style={{background:"white",border:"1px solid #f3f4f6",borderRadius:12,padding:"11px 13px",cursor:"pointer",boxShadow:"0 1px 2px rgba(0,0,0,.04)"}}>
