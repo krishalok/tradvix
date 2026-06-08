@@ -468,7 +468,7 @@ export default function App(){
   // ── WATCHLIST ────────────────────────────────────────────────
   const toggleWL=sym=>{setWl(prev=>{const n=new Set(prev);n.has(sym)?(n.delete(sym),showToast("Removed")):( n.add(sym),showToast("Added ⭐"));try{localStorage.setItem("tv6",JSON.stringify([...n]));}catch{}return n;});};
 
-  // ── AI ANALYSIS ──────────────────────────────────────────────
+  // ── AI RESEARCH ──────────────────────────────────────────────
   const loadAnalysis=async(sym,level)=>{
     const key=`${sym}_${level}`;
     if(aiAnalysis[key])return;
@@ -652,12 +652,12 @@ export default function App(){
             </div>
           </div>}
 
-          {/* AI Analysis */}
+          {/* AI Research */}
           <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16}}>
             <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12}}>
               <div style={{width:32,height:32,borderRadius:"50%",background:N,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:10,fontWeight:700,color:"#00e676",flexShrink:0}}>AI</div>
               <div style={{flex:1}}>
-                <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:8}}>ARIA — LLAMA 3.3 70B · LIVE AI ANALYSIS</div>
+                <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:8}}>ARIA — LLAMA 3.3 70B · LIVE AI RESEARCH</div>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
                   {["novice","intermediate","expert","deep"].map(l=>(
                     <button key={l} onClick={async()=>{setAiLevel(l);await loadAnalysis(sheet,l);}} style={{
@@ -672,12 +672,12 @@ export default function App(){
                   :aiAnalysis[aiKey]?aiAnalysis[aiKey]
                   :<span style={{color:"#9ca3af"}}>Tap a level above to get AI analysis powered by Llama 3.3 70B</span>}
                 </div>
-                <div style={{fontFamily:"monospace",fontSize:8,color:"#d1d5db",marginTop:6}}>Llama 3.3 70B via Groq · Cached 1hr · Not financial advice</div>
+                <div style={{fontFamily:"monospace",fontSize:8,color:"#d1d5db",marginTop:6}}>Llama 3.3 70B via Groq · Cached 1hr · For informational and research purposes only</div>
               </div>
             </div>
           </div>
 
-          {/* Price Targets */}
+          {/* Research Estimates */}
           {sc?.targets&&<div>
             <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>🎯 AI PRICE TARGETS</div>
             <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:3}}>
@@ -939,12 +939,12 @@ export default function App(){
           <div style={{padding:"12px 16px 0"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
               <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,fontWeight:600}}>▲ TOP GAINERS</div>
-              <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",background:"#f3f4f6",borderRadius:20,padding:"2px 8px"}}>{buyCnt} BUY SIGNALS</div>
+              <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",background:"#f3f4f6",borderRadius:20,padding:"2px 8px"}}>{buyCnt} RESEARCH SIGNALS</div>
             </div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
                 <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:G}}>▲ GAINERS · FINTEL QUANTUM SCORE™</span>
-                <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>TAP FOR AI ANALYSIS</span>
+                <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>TAP FOR AI RESEARCH</span>
               </div>
               {gainers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
               :gainers.map((x,i)=><MRow key={i} item={x} rank={i+1} gain={true}/>)}
@@ -957,7 +957,7 @@ export default function App(){
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
                 <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:R}}>▼ LOSERS · FINTEL QUANTUM SCORE™</span>
-                <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>ARIA MONITORS THESE</span>
+                <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>ARIA TRACKS THESE</span>
               </div>
               {losers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
               :losers.map((x,i)=><MRow key={i} item={x} rank={i+1} gain={false}/>)}
