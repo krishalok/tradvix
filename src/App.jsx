@@ -342,7 +342,8 @@ export default function App(){
   const [srch,setSrch]=useState("");
   const [toast,setToast]=useState(null);
   const [ariaLines,setAriaLines]=useState([]);
-  const [ariaIdx,setAriaIdx]=useState(0);
+  const ariaIdxRef=useRef(0);
+  const [ariaDisplay,setAriaDisplay]=useState(0);
   const [aiLevel,setAiLevel]=useState("novice");
   const [aiAnalysis,setAiAnalysis]=useState({});
   const [aiLoading,setAiLoading]=useState(false);
@@ -428,7 +429,7 @@ export default function App(){
   },[]);
 
   // ── ARIA CYCLE ───────────────────────────────────────────────
-  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>setAriaIdx(i=>(i+1)%ariaLines.length),8000);return()=>clearInterval(id);},[ariaLines]);
+  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>{ariaIdxRef.current=(ariaIdxRef.current+1)%ariaLines.length;setAriaDisplay(ariaIdxRef.current);},8000);return()=>clearInterval(id);},[ariaLines]);
 
   // ── AUTO REFRESH ─────────────────────────────────────────────
   useEffect(()=>{
@@ -799,7 +800,6 @@ export default function App(){
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
           <input ref={chatInputRef}
             onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}
-            onBlur={()=>setTimeout(()=>chatInputRef.current?.focus(),10)}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
           <button onClick={sendChat} disabled={chatLoading}
@@ -852,7 +852,7 @@ export default function App(){
               <div style={{flex:1}}>
                 <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:5}}>ARIA · AI ANALYST · DAILY BRIEF</div>
                 <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:"0 14px 14px 14px",padding:"11px 14px",fontSize:12,color:N,lineHeight:1.65,boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
-                  {ariaLines[ariaIdx]&&<TypeText text={ariaLines[ariaIdx].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
+                  {ariaLines[ariaDisplay]&&<TypeText text={ariaLines[ariaDisplay].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
                 </div>
                 {ariaLines.length>1&&<div style={{display:"flex",gap:4,marginTop:7}}>
                   {ariaLines.map((_,i)=><div key={i} style={{width:i===ariaIdx?14:4,height:3,borderRadius:2,background:i===ariaIdx?N:"#e5e7eb",transition:"width .3s"}}/>)}
