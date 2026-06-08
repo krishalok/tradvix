@@ -763,7 +763,8 @@ export default function App(){
 
   // ── ARIA CHAT ─────────────────────────────────────────────────
   const Chat=()=>{
-    return <AriaChat open={chatOpen} onClose={()=>setChatOpen(false)} sheet={sheet} token={getToken()}/>;
+    const tok=getToken();
+    return <AriaChat open={chatOpen} onClose={()=>setChatOpen(false)} sheet={sheet} token={tok}/>;
     };
 
   // ── MAIN RENDER ───────────────────────────────────────────────
