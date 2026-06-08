@@ -349,6 +349,7 @@ export default function App(){
   const [chatOpen,setChatOpen]=useState(false);
   const [chatHistory,setChatHistory]=useState([]);
   const [chatInput,setChatInput]=useState("");
+  const chatInputRef=useRef(null);
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
@@ -480,10 +481,9 @@ export default function App(){
 
   // ── CHAT ─────────────────────────────────────────────────────
   const sendChat=async()=>{
-    const inp=document.getElementById('fq-chat-input');
-    const msg=(inp?.value||'').trim();
+    const msg=(chatInputRef.current?.value||'').trim();
     if(!msg)return;
-    if(inp)inp.value='';
+    if(chatInputRef.current)chatInputRef.current.value='';
     const newHistory=[...chatHistory,{role:"user",content:msg}];
     setChatHistory(newHistory);setChatLoading(true);
     try{
@@ -797,8 +797,9 @@ export default function App(){
           </div>}
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-          <input id="fq-chat-input"
+          <input ref={chatInputRef}
             onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}
+            onBlur={()=>setTimeout(()=>chatInputRef.current?.focus(),10)}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
           <button onClick={sendChat} disabled={chatLoading}
