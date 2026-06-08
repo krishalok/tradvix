@@ -235,11 +235,11 @@ function computeScore(sym,q){
   const dims={momentum:clamp(momentum),value:clamp(value),growth:clamp(growth),safety:clamp(safety),sentiment:clamp(sentiment),technical:clamp(technical)};
   const total=Math.round(Object.values(dims).reduce((a,b)=>a+b,0)/6);
   let dec,cls,emoji,brief;
-  if(total>=72){dec="STRONG BUY";cls="sb";emoji="🚀";brief="Exceptional setup. High conviction.";}
-  else if(total>=58){dec="BUY";cls="b";emoji="✅";brief="Favorable risk/reward. Consider entry.";}
-  else if(total>=44){dec="HOLD";cls="h";emoji="⏸️";brief="Mixed signals. Hold and monitor.";}
-  else if(total>=30){dec="SELL";cls="s";emoji="⚠️";brief="Risk outweighs reward.";}
-  else{dec="STRONG SELL";cls="ss";emoji="🔴";brief="Multiple danger signals. Exit or avoid.";}
+  if(total>=72){dec="OVERWEIGHT";cls="sb";emoji="🚀";brief="Exceptional setup. High conviction.";}
+  else if(total>=58){dec="ACCUMULATE";cls="b";emoji="✅";brief="Favorable risk/reward. Consider entry.";}
+  else if(total>=44){dec="NEUTRAL";cls="h";emoji="⏸️";brief="Mixed signals. Hold and monitor.";}
+  else if(total>=30){dec="REDUCE";cls="s";emoji="⚠️";brief="Risk outweighs reward.";}
+  else{dec="UNDERWEIGHT";cls="ss";emoji="🔴";brief="Multiple danger signals. Exit or avoid.";}
   const bias=(total-50)/500;
   const vol2=c&&c.length>5?Math.abs(c[c.length-1]-c[c.length-6])/c[c.length-6]:0.04;
   const targets={"1W":+(p*(1+bias*.1+vol2*.05)).toFixed(2),"1M":+(p*(1+bias*.4+vol2*.1)).toFixed(2),"3M":+(p*(1+bias*1.0+vol2*.2)).toFixed(2),"6M":+(p*(1+bias*1.8+vol2*.3)).toFixed(2),"1Y":+(p*(1+bias*3.0+vol2*.4)).toFixed(2)};
@@ -495,7 +495,7 @@ export default function App(){
   const allQ=STOCKS.map(s=>({...s,q:data[s.s],sc:scores[s.s]})).filter(x=>x.q);
   const adv=allQ.filter(x=>x.q.dp>=0).length,dec=allQ.filter(x=>x.q.dp<0).length;
   const upPct=Math.round(adv/(adv+dec||1)*100);
-  const buyCnt=Object.values(scores).filter(s=>s?.dec?.includes("BUY")).length;
+  const buyCnt=Object.values(scores).filter(s=>s?.dec?.includes("ACCUMULATE")).length;
   const gems=allQ.filter(x=>x.sc&&x.sc.total>=65&&Math.abs(x.q.dp)<1.5).sort((a,b)=>b.sc.total-a.sc.total).slice(0,4);
 
   // ── STYLES ───────────────────────────────────────────────────
@@ -627,7 +627,7 @@ export default function App(){
 
           {/* FINTEL QUANTUM Score + Radar */}
           {sc&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16}}>
-            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>FINTEL QUANTUM SCORE™ — PROPRIETARY AI RATING</div>
+            <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>FQ INTELLIGENCE SCORE™ — PROPRIETARY AI RATING</div>
             <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap",marginBottom:14}}>
               <ScoreRing score={sc.total} size={72}/>
               <div style={{flex:1,minWidth:120}}>
@@ -943,7 +943,7 @@ export default function App(){
             </div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:G}}>▲ GAINERS · FINTEL QUANTUM SCORE™</span>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:G}}>▲ GAINERS · FQ INTELLIGENCE SCORE™</span>
                 <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>TAP FOR AI RESEARCH</span>
               </div>
               {gainers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
@@ -956,7 +956,7 @@ export default function App(){
             <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,fontWeight:600,marginBottom:8}}>▼ TOP LOSERS</div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:R}}>▼ LOSERS · FINTEL QUANTUM SCORE™</span>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:R}}>▼ LOSERS · FQ INTELLIGENCE SCORE™</span>
                 <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>ARIA TRACKS THESE</span>
               </div>
               {losers.length===0?<div style={{padding:32,textAlign:"center",fontFamily:"monospace",fontSize:11,color:"#9ca3af"}}>Loading...</div>
@@ -972,7 +972,7 @@ export default function App(){
             </div>
             <div style={{...card}}>
               <div style={{padding:"10px 16px",background:"#f9fafb",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:N}}>🏆 TOP 20 S&P 500 · FINTEL QUANTUM SCORE™</span>
+                <span style={{fontFamily:"system-ui",fontWeight:700,fontSize:12,color:N}}>🏆 TOP 20 S&P 500 · FQ INTELLIGENCE SCORE™</span>
                 <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>LARGEST US COMPANIES</span>
               </div>
               {SP500_TOP20.map((s,i)=>{
@@ -1039,16 +1039,16 @@ export default function App(){
         {tab==="signals"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}}>
           <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>🤖 AI SIGNAL BOARD</div>
           <div style={{display:"flex",gap:8,marginBottom:12,overflowX:"auto"}}>
-            {["ALL","🚀 BUY","⏸️ HOLD","🔴 SELL"].map(f=>(
+            {["ALL","🚀 ACCUMULATE","⏸️ NEUTRAL","◇ REDUCE"].map(f=>(
               <button key={f} onClick={()=>setSigFilter(f)} style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${sigFilter===f?N:"#e5e7eb"}`,cursor:"pointer",fontFamily:"monospace",fontSize:10,flexShrink:0,background:sigFilter===f?N:"white",color:sigFilter===f?"white":"#6b7280",fontWeight:sigFilter===f?700:400}}>{f}</button>
             ))}
           </div>
           <div style={{...card}}>
             {allQ.filter(x=>x.sc).filter(x=>{
               if(sigFilter==="ALL")return true;
-              if(sigFilter.includes("BUY"))return x.sc.dec.includes("BUY");
-              if(sigFilter.includes("HOLD"))return x.sc.dec==="HOLD";
-              if(sigFilter.includes("SELL"))return x.sc.dec.includes("SELL");
+              if(sigFilter.includes("ACCUMULATE"))return x.sc.dec.includes("ACCUMULATE");
+              if(sigFilter.includes("NEUTRAL"))return x.sc.dec==="NEUTRAL";
+              if(sigFilter.includes("REDUCE"))return x.sc.dec.includes("REDUCE");
               return true;
             }).sort((a,b)=>b.sc.total-a.sc.total)
               .map(x=><SRow key={x.s} sym={x.s} name={x.n} q={x.q} sc={x.sc} gain={x.q.dp>=0} emoji={x.e}/>)
