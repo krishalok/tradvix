@@ -480,11 +480,10 @@ export default function App(){
 
   // ── CHAT ─────────────────────────────────────────────────────
   const sendChat=async()=>{
-    const domVal=document.getElementById('fq-chat-input')?.value||'';
-    const msgVal=chatInput.trim()||domVal.trim();
-    if(!msgVal)return;
-    const msg=msgVal;setChatInput("");
-    if(document.getElementById('fq-chat-input'))document.getElementById('fq-chat-input').value='';
+    const inp=document.getElementById('fq-chat-input');
+    const msg=(inp?.value||'').trim();
+    if(!msg)return;
+    if(inp)inp.value='';
     const newHistory=[...chatHistory,{role:"user",content:msg}];
     setChatHistory(newHistory);setChatLoading(true);
     try{
@@ -799,10 +798,10 @@ export default function App(){
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
           <input id="fq-chat-input"
-            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const v=document.getElementById('fq-chat-input').value;if(v.trim()){document.getElementById('fq-chat-input').value='';setChatInput(v);setTimeout(sendChat,0);}}}}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
-          <button onClick={()=>{const v=document.getElementById('fq-chat-input')?.value||'';if(v.trim()){setChatInput(v);setTimeout(sendChat,0);}}} disabled={chatLoading}
+          <button onClick={sendChat} disabled={chatLoading}
             style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
         </div>
       </div>
