@@ -1,18 +1,13 @@
 
-const ChatInput=React.memo(({onSend,sheet})=>{
+const ChatInput=React.memo(({onSend,disabled,sheet})=>{
   const ref=React.useRef(null);
-  const loadingRef=React.useRef(false);
   const send=()=>{
-    if(loadingRef.current)return;
     const v=ref.current?.value||'';
-    if(!v.trim())return;
-    loadingRef.current=true;
-    const saved=v;
-    ref.current.value='';
-    ref.current.focus();
-    onSend(saved).finally(()=>{
-      loadingRef.current=false;
-    });
+    if(v.trim()&&!disabled){
+      onSend(v);
+      ref.current.value='';
+      ref.current.focus();
+    }
   };
   return(
     <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
@@ -20,11 +15,11 @@ const ChatInput=React.memo(({onSend,sheet})=>{
         onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
         placeholder={`Ask ARIA about ${sheet||"the market"}...`}
         style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:14,color:"#0f172a",outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
-      <button onClick={send}
+      <button onClick={send} disabled={disabled}
         style={{width:42,height:42,borderRadius:"50%",background:"#0f172a",border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
     </div>
   );
-},[]);
+});
 import { useState, useEffect, useRef, useCallback } from "react";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
@@ -508,7 +503,7 @@ export default function App(){
 
   // ── CHAT ─────────────────────────────────────────────────────
   const sendChatDirect=async(msg)=>{
-    if(!msg?.trim())return Promise.resolve();
+    if(!msg?.trim())return;
     const newHistory=[...chatHistory,{role:"user",content:msg}];
     setChatHistory(newHistory);setChatLoading(true);
     try{
@@ -832,7 +827,7 @@ export default function App(){
             <div style={{width:6,height:6,borderRadius:"50%",background:"#d1d5db",animation:"blink 1s .4s infinite"}}/>
           </div>}
         </div>
-        <ChatInput onSend={sendChatDirect} sheet={sheet}/>
+        <ChatInput onSend={sendChatDirect} disabled={chatLoading} sheet={sheet}/>
       </div>
     </div>;
   };
