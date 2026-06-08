@@ -123,7 +123,6 @@ export default function AriaChat({ open, onClose, sheet, token }) {
         <div style={{ padding:'14px 16px', borderTop:'1px solid #f3f4f6', display:'flex', gap:10, background:'white' }}>
           <input
             ref={inputRef}
-            autoFocus
             onKeyDown={e => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
