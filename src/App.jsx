@@ -4,9 +4,9 @@ const ChatInput=React.memo(({onSend,disabled,sheet})=>{
   const send=()=>{
     const v=ref.current?.value||'';
     if(v.trim()&&!disabled){
-      ref.current.value='';
       onSend(v);
-      setTimeout(()=>ref.current?.focus(),50);
+      ref.current.value='';
+      ref.current.focus();
     }
   };
   return(
