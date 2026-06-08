@@ -795,8 +795,9 @@ export default function App(){
           </div>}
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-          <input value={chatInput} onChange={e=>{e.stopPropagation();setChatInput(e.target.value);}}
-            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
+          <input value={chatInput} 
+            onChange={e=>setChatInput(e.target.value)}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}
             placeholder={`Ask about ${sheet||"the market"}...`}
             style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
           <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
