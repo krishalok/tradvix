@@ -55,10 +55,8 @@ export default function AriaChat({ open, onClose, sheet, token }) {
     inp.focus();
   };
 
-  if (!open) return null;
-
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:500, backdropFilter:'blur(8px)', display:'flex', alignItems:'flex-end' }}>
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:500, display: open ? 'flex' : 'none', backdropFilter:'blur(8px)', display:'flex', alignItems:'flex-end' }}>
       <div style={{ background:'white', borderRadius:'24px 24px 0 0', width:'100%', height:'75dvh', display:'flex', flexDirection:'column', boxShadow:'0 -8px 40px rgba(0,0,0,.15)' }}>
 
         {/* Header */}
