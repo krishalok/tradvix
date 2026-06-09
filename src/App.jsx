@@ -351,9 +351,7 @@ export default function App(){
   const [chatOpen,setChatOpen]=useState(false);
   const chatOpenRef=useRef(false);
 
-  const [chatHistory,setChatHistory]=useState([]);
 
-  const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
   const clockRef=useRef(null);
@@ -483,18 +481,6 @@ export default function App(){
     setAiLoading(false);
   };
 
-  // ── CHAT ─────────────────────────────────────────────────────
-  const sendChat=async()=>{
-    if(!chatInput.trim())return;
-    const msg=chatInput.trim();setChatInput("");
-    const newHistory=[...chatHistory,{role:"user",content:msg}];
-    setChatHistory(newHistory);setChatLoading(true);
-    try{
-      const r=await apiPost('/api/chat',{message:msg,symbol:sheet,history:chatHistory.slice(-6)});
-      setChatHistory(h=>[...h,{role:"assistant",content:r.response}]);
-    }catch(e){setChatHistory(h=>[...h,{role:"assistant",content:"Sorry, I couldn't process that. Please try again."}]);}
-    setChatLoading(false);
-  };
 
   // ── COMPUTED ─────────────────────────────────────────────────
   const allQ=STOCKS.map(s=>({...s,q:data[s.s],sc:scores[s.s]})).filter(x=>x.q);
@@ -1079,7 +1065,7 @@ export default function App(){
       </div>
 
       <Sheet/>
-      <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={getToken()}/>
+      <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={localStorage.getItem('tv_token')}/>
 
       {toast&&<div style={{position:"fixed",bottom:"calc(68px + env(safe-area-inset-bottom,20px))",left:"50%",transform:"translateX(-50%)",background:N,borderRadius:22,padding:"9px 18px",fontFamily:"monospace",fontSize:11,color:"white",zIndex:600,whiteSpace:"nowrap",boxShadow:"0 4px 12px rgba(0,0,0,.15)"}}>{toast}</div>}
 
