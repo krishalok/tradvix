@@ -436,6 +436,7 @@ export default function App(){
     if(loading)return;
     const id=setInterval(async()=>{
       if(sheetOpen.current)return;
+      if(chatOpen)return;
       try{
         const [qData,gData,lData]=await Promise.all([api('/api/quotes'),api('/api/gainers'),api('/api/losers')]);
         setData(prev=>{
