@@ -766,10 +766,7 @@ export default function App(){
   };
 
   // ── ARIA CHAT ─────────────────────────────────────────────────
-  const Chat=()=>{
-    const tok=getToken();
-    return <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={tok}/>;
-    };
+
 
   // ── MAIN RENDER ───────────────────────────────────────────────
   return(
@@ -1082,7 +1079,7 @@ export default function App(){
       </div>
 
       <Sheet/>
-      <Chat/>
+      <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={getToken()}/>
 
       {toast&&<div style={{position:"fixed",bottom:"calc(68px + env(safe-area-inset-bottom,20px))",left:"50%",transform:"translateX(-50%)",background:N,borderRadius:22,padding:"9px 18px",fontFamily:"monospace",fontSize:11,color:"white",zIndex:600,whiteSpace:"nowrap",boxShadow:"0 4px 12px rgba(0,0,0,.15)"}}>{toast}</div>}
 
