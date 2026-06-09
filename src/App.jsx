@@ -350,6 +350,7 @@ export default function App(){
   const [chatHistory,setChatHistory]=useState([]);
   const [chatInput,setChatInput]=useState("");
   const chatDraft=useRef("");
+  const chatDraft=useRef("");
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
