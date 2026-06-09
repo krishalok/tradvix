@@ -349,6 +349,8 @@ export default function App(){
   const [aiAnalysis,setAiAnalysis]=useState({});
   const [aiLoading,setAiLoading]=useState(false);
   const [chatOpen,setChatOpen]=useState(false);
+  const chatOpenRef=useRef(false);
+
   const [chatHistory,setChatHistory]=useState([]);
 
   const [chatLoading,setChatLoading]=useState(false);
@@ -436,7 +438,7 @@ export default function App(){
     if(loading)return;
     const id=setInterval(async()=>{
       if(sheetOpen.current)return;
-      if(chatOpen)return;
+      if(chatOpenRef.current)return;
       try{
         const [qData,gData,lData]=await Promise.all([api('/api/quotes'),api('/api/gainers'),api('/api/losers')]);
         setData(prev=>{
@@ -753,7 +755,7 @@ export default function App(){
             <button onClick={()=>toggleWL(sheet)} style={{flex:1,background:wl.has(sheet)?"#f0fdf4":"white",border:`1px solid ${wl.has(sheet)?G:"#e5e7eb"}`,borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:wl.has(sheet)?G:N,cursor:"pointer",fontFamily:"system-ui"}}>
               {wl.has(sheet)?"✓ In Watchlist":"⭐ Add to Watchlist"}
             </button>
-            <button onClick={()=>setChatOpen(true)} style={{flex:1,background:N,border:"none",borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:"white",cursor:"pointer",fontFamily:"system-ui"}}>
+            <button onClick={()=>{setChatOpen(true);chatOpenRef.current=true;}} style={{flex:1,background:N,border:"none",borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:"white",cursor:"pointer",fontFamily:"system-ui"}}>
               🧠 Ask ARIA
             </button>
           </div>
@@ -766,7 +768,7 @@ export default function App(){
   // ── ARIA CHAT ─────────────────────────────────────────────────
   const Chat=()=>{
     const tok=getToken();
-    return <AriaChat open={chatOpen} onClose={()=>setChatOpen(false)} sheet={sheet} token={tok}/>;
+    return <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={tok}/>;
     };
 
   // ── MAIN RENDER ───────────────────────────────────────────────
