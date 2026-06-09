@@ -1,172 +1,122 @@
 import { useState, useRef, useEffect } from "react";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
+const N = '#0f172a';
+const G = '#16a34a';
 
 export default function AriaChat({ open, onClose, sheet, token }) {
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const inputRef = useRef(null);
-  const endRef = useRef(null);
-  const historyRef = useRef([]);
+  const [msgs, setMsgs] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 150);
-  }, [open]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [msgs, busy]);
 
-  useEffect(() => {
-    historyRef.current = history;
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history]);
-
-  const send = async () => {
-    const inp = inputRef.current;
-    if (!inp || loading) return;
-    const msg = inp.value.trim();
-    if (!msg) return;
-    inp.value = '';
-    inp.focus();
-    const newHistory = [...historyRef.current, { role: 'user', content: msg }];
-    historyRef.current = newHistory;
-    setHistory([...newHistory]);
-    setLoading(true);
+  const submit = async (e) => {
+    e?.preventDefault();
+    const form = e?.target || document.getElementById('aria-form');
+    const input = form?.querySelector('input');
+    if (!input) return;
+    const msg = input.value.trim();
+    if (!msg || busy) return;
+    input.value = '';
+    input.focus();
+    const updated = [...msgs, { r: 'u', t: msg }];
+    setMsgs(updated);
+    setBusy(true);
     try {
-      const r = await fetch(`${BACKEND}/api/chat`, {
+      const res = await fetch(`${BACKEND}/api/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          message: msg,
-          symbol: sheet,
-          history: historyRef.current.slice(-6)
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ message: msg, symbol: sheet, history: updated.slice(-6).map(m => ({ role: m.r === 'u' ? 'user' : 'assistant', content: m.t })) })
       });
-      const d = await r.json();
-      const reply = { role: 'assistant', content: d.response || 'No response' };
-      historyRef.current = [...historyRef.current, reply];
-      setHistory([...historyRef.current]);
+      const data = await res.json();
+      setMsgs(h => [...h, { r: 'a', t: data.response || 'No response' }]);
     } catch {
-      const err = { role: 'assistant', content: 'Sorry, could not connect.' };
-      historyRef.current = [...historyRef.current, err];
-      setHistory([...historyRef.current]);
+      setMsgs(h => [...h, { r: 'a', t: 'Could not connect. Please try again.' }]);
     }
-    setLoading(false);
-    inp.focus();
+    setBusy(false);
   };
 
+  if (!open) return null;
+
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:500, display: open ? 'flex' : 'none', backdropFilter:'blur(8px)', display:'flex', alignItems:'flex-end' }}>
-      <div style={{ background:'white', borderRadius:'24px 24px 0 0', width:'100%', height:'75dvh', display:'flex', flexDirection:'column', boxShadow:'0 -8px 40px rgba(0,0,0,.15)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', background: 'rgba(0,0,0,0.5)' }}>
+      <div style={{ background: 'white', borderRadius: '20px 20px 0 0', height: '75vh', display: 'flex', flexDirection: 'column', boxShadow: '0 -4px 32px rgba(0,0,0,0.15)' }}>
 
         {/* Header */}
-        <div style={{ padding:'16px 20px', borderBottom:'1px solid #f3f4f6', display:'flex', justifyContent:'space-between', alignItems:'center', borderRadius:'24px 24px 0 0', background:'white' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <div style={{ width:38, height:38, borderRadius:'50%', background:'#0f172a', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'monospace', fontSize:11, fontWeight:700, color:'#00e676' }}>AI</div>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: N, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00e676', fontSize: 11, fontWeight: 800, fontFamily: 'monospace' }}>AI</div>
             <div>
-              <div style={{ fontWeight:700, fontSize:15, color:'#0f172a' }}>ARIA — AI Research Analyst</div>
-              <div style={{ fontFamily:'monospace', fontSize:9, color:'#9ca3af', marginTop:2 }}>Llama 3.3 70B · {sheet ? `Analyzing ${sheet}` : 'Market Intelligence'}</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: N }}>ARIA Research Analyst</div>
+              <div style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace' }}>Llama 3.3 70B · {sheet ? `${sheet} context` : 'Market Intelligence'}</div>
             </div>
           </div>
-          <div onClick={onClose} style={{ width:30, height:30, borderRadius:'50%', background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:13, color:'#6b7280' }}>✕</div>
+          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontSize: 16, color: '#6b7280', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
 
         {/* Messages */}
-        <div style={{ flex:1, overflowY:'auto', padding:'20px', display:'flex', flexDirection:'column', gap:14 }}>
-          {history.length === 0 && (
-            <div style={{ textAlign:'center', padding:'40px 20px' }}>
-              <div style={{ fontSize:40, marginBottom:14 }}>🧠</div>
-              <div style={{ fontWeight:700, fontSize:17, color:'#0f172a', marginBottom:10 }}>Ask ARIA anything</div>
-              <div style={{ fontSize:13, color:'#9ca3af', lineHeight:1.7, maxWidth:280, margin:'0 auto' }}>
-                "What is the outlook for tech stocks?"<br/>
-                "Why is NVDA up today?"<br/>
-                "Compare AAPL vs MSFT"
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {msgs.length === 0 && (
+            <div style={{ textAlign: 'center', marginTop: 60 }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>🧠</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: N, marginBottom: 10 }}>Ask ARIA anything</div>
+              <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.8 }}>
+                "What is the outlook for tech stocks?"<br />
+                "Why is NVDA moving today?"<br />
+                "Compare AAPL and MSFT"
               </div>
             </div>
           )}
-          {history.map((m, i) => (
-            <div key={i} style={{ display:'flex', justifyContent:m.role==='user'?'flex-end':'flex-start' }}>
-              {m.role === 'assistant' && (
-                <div style={{ width:28, height:28, borderRadius:'50%', background:'#0f172a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, color:'#00e676', fontFamily:'monospace', flexShrink:0, marginRight:8, marginTop:4 }}>AI</div>
+          {msgs.map((m, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: m.r === 'u' ? 'flex-end' : 'flex-start', gap: 10, alignItems: 'flex-start' }}>
+              {m.r === 'a' && (
+                <div style={{ width: 30, height: 30, borderRadius: '50%', background: N, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00e676', fontSize: 9, fontWeight: 800, fontFamily: 'monospace', flexShrink: 0, marginTop: 4 }}>AI</div>
               )}
               <div style={{
-                maxWidth:'80%',
-                background: m.role==='user' ? '#0f172a' : '#f8fafc',
-                border: m.role==='user' ? 'none' : '1px solid #e5e7eb',
-                borderRadius: m.role==='user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                padding:'12px 16px',
-                fontSize:14,
-                color: m.role==='user' ? 'white' : '#0f172a',
-                lineHeight:1.75,
-                whiteSpace:'pre-wrap'
+                maxWidth: '80%',
+                padding: '12px 16px',
+                borderRadius: m.r === 'u' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                background: m.r === 'u' ? N : '#f8fafc',
+                color: m.r === 'u' ? 'white' : N,
+                fontSize: 14,
+                lineHeight: 1.75,
+                whiteSpace: 'pre-wrap',
+                border: m.r === 'u' ? 'none' : '1px solid #e5e7eb'
               }}>
-                {m.content}
+                {m.t}
               </div>
             </div>
           ))}
-          {loading && (
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <div style={{ width:28, height:28, borderRadius:'50%', background:'#0f172a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, color:'#00e676', fontFamily:'monospace', flexShrink:0 }}>AI</div>
-              <div style={{ display:'flex', gap:5, padding:'12px 16px', background:'#f8fafc', border:'1px solid #e5e7eb', borderRadius:'20px 20px 20px 4px' }}>
-                <div style={{ width:7, height:7, borderRadius:'50%', background:'#94a3b8', animation:'blink 1s 0s infinite' }}/>
-                <div style={{ width:7, height:7, borderRadius:'50%', background:'#94a3b8', animation:'blink 1s .2s infinite' }}/>
-                <div style={{ width:7, height:7, borderRadius:'50%', background:'#94a3b8', animation:'blink 1s .4s infinite' }}/>
+          {busy && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ width: 30, height: 30, borderRadius: '50%', background: N, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00e676', fontSize: 9, fontWeight: 800, fontFamily: 'monospace', flexShrink: 0 }}>AI</div>
+              <div style={{ padding: '12px 18px', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '20px 20px 20px 4px', display: 'flex', gap: 6 }}>
+                {[0, 200, 400].map(d => (
+                  <div key={d} style={{ width: 8, height: 8, borderRadius: '50%', background: '#94a3b8', animation: `pulse 1.2s ${d}ms infinite` }} />
+                ))}
               </div>
             </div>
           )}
-          <div ref={endRef}/>
+          <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <div style={{ padding:'14px 16px', borderTop:'1px solid #f3f4f6', display:'flex', gap:10, background:'white' }}>
+        {/* Input - using native form to prevent React interference */}
+        <form id="aria-form" onSubmit={submit} style={{ padding: '14px 16px', borderTop: '1px solid #f0f0f0', display: 'flex', gap: 10, background: 'white', flexShrink: 0 }}>
           <input
-            ref={inputRef}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                e.stopPropagation();
-                send();
-              }
-            }}
+            type="text"
             placeholder={`Ask about ${sheet || 'the market'}...`}
-            style={{
-              flex:1,
-              border:'1.5px solid #e2e8f0',
-              borderRadius:28,
-              padding:'13px 20px',
-              fontSize:14,
-              color:'#0f172a',
-              outline:'none',
-              fontFamily:'system-ui',
-              background:'#f8fafc',
-              transition:'border-color .2s'
-            }}
-            onFocus={e => e.target.style.borderColor='#0f172a'}
-            onBlur={e => e.target.style.borderColor='#e2e8f0'}
+            style={{ flex: 1, border: '1.5px solid #e2e8f0', borderRadius: 28, padding: '13px 20px', fontSize: 14, color: N, outline: 'none', fontFamily: 'system-ui', background: '#f8fafc' }}
+            onFocus={e => e.target.style.borderColor = N}
+            onBlur={e => e.target.style.borderColor = '#e2e8f0'}
           />
-          <button
-            onClick={send}
-            style={{
-              width:46,
-              height:46,
-              borderRadius:'50%',
-              background:'#0f172a',
-              border:'none',
-              color:'white',
-              fontSize:20,
-              cursor:'pointer',
-              display:'flex',
-              alignItems:'center',
-              justifyContent:'center',
-              flexShrink:0,
-              transition:'transform .15s'
-            }}
-            onMouseEnter={e => e.target.style.transform='scale(1.08)'}
-            onMouseLeave={e => e.target.style.transform='scale(1)'}
-          >↑</button>
-        </div>
+          <button type="submit" style={{ width: 46, height: 46, borderRadius: '50%', background: N, border: 'none', color: 'white', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>↑</button>
+        </form>
 
       </div>
+      <style>{`@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}`}</style>
     </div>
   );
 }
