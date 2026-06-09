@@ -348,9 +348,6 @@ export default function App(){
   const [aiLoading,setAiLoading]=useState(false);
   const [chatOpen,setChatOpen]=useState(false);
   const [chatHistory,setChatHistory]=useState([]);
-  const [chatInput,setChatInput]=useState("");
-  const chatDraft=useRef("");
-  const chatDraft=useRef("");
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
@@ -485,14 +482,16 @@ export default function App(){
     const el=document.getElementById('chat-in');
     const msg=(el?.value||'').trim();
     if(!msg)return;
-    if(el)el.value='';
+    el.value='';
+    el.focus();
     const newHistory=[...chatHistory,{role:"user",content:msg}];
     setChatHistory(newHistory);setChatLoading(true);
     try{
       const r=await apiPost('/api/chat',{message:msg,symbol:sheet,history:chatHistory.slice(-6)});
       setChatHistory(h=>[...h,{role:"assistant",content:r.response}]);
-    }catch(e){setChatHistory(h=>[...h,{role:"assistant",content:"Sorry, I couldn't process that. Please try again."}]);}
+    }catch(e){setChatHistory(h=>[...h,{role:"assistant",content:"Sorry, I couldn't process that."}]);}
     setChatLoading(false);
+    el?.focus();
   };
 
   // ── COMPUTED ─────────────────────────────────────────────────
@@ -799,12 +798,8 @@ export default function App(){
           </div>}
         </div>
         <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
-          <input id="chat-in" key="chat-stable" defaultValue="" onChange={e=>{chatDraft.current=e.target.value;document.getElementById("chat-in").value=chatDraft.current;}}
-            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
-            placeholder={`Ask about ${sheet||"the market"}...`}
-            style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
-          <button onClick={sendChat} disabled={chatLoading}
-            style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
+          <input id="chat-in" placeholder={`Ask about ${sheet||"the market"}...`} style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}} onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}}/>
+          <button onClick={sendChat} disabled={chatLoading} style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
         </div>
       </div>
     </div>;
