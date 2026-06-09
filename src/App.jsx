@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import AriaChat from "./AriaChat";
 
 const BACKEND = 'https://tradvix-backend.onrender.com';
 
@@ -343,16 +342,13 @@ export default function App(){
   const [srch,setSrch]=useState("");
   const [toast,setToast]=useState(null);
   const [ariaLines,setAriaLines]=useState([]);
-  const ariaIdxRef=useRef(0);
   const [ariaIdx,setAriaIdx]=useState(0);
   const [aiLevel,setAiLevel]=useState("novice");
   const [aiAnalysis,setAiAnalysis]=useState({});
   const [aiLoading,setAiLoading]=useState(false);
   const [chatOpen,setChatOpen]=useState(false);
-  const chatOpenRef=useRef(false);
-
   const [chatHistory,setChatHistory]=useState([]);
-
+  const [chatInput,setChatInput]=useState("");
   const [chatLoading,setChatLoading]=useState(false);
   const [stockNews,setStockNews]=useState({});
   const [research,setResearch]=useState({});
@@ -431,14 +427,13 @@ export default function App(){
   },[]);
 
   // ── ARIA CYCLE ───────────────────────────────────────────────
-  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>{ariaIdxRef.current=(ariaIdxRef.current+1)%ariaLines.length;setAriaIdx(ariaIdxRef.current);},8000);return()=>clearInterval(id);},[ariaLines]);
+  useEffect(()=>{if(!ariaLines.length)return;const id=setInterval(()=>setAriaIdx(i=>(i+1)%ariaLines.length),8000);return()=>clearInterval(id);},[ariaLines]);
 
   // ── AUTO REFRESH ─────────────────────────────────────────────
   useEffect(()=>{
     if(loading)return;
     const id=setInterval(async()=>{
       if(sheetOpen.current)return;
-      if(chatOpenRef.current)return;
       try{
         const [qData,gData,lData]=await Promise.all([api('/api/quotes'),api('/api/gainers'),api('/api/losers')]);
         setData(prev=>{
@@ -755,7 +750,7 @@ export default function App(){
             <button onClick={()=>toggleWL(sheet)} style={{flex:1,background:wl.has(sheet)?"#f0fdf4":"white",border:`1px solid ${wl.has(sheet)?G:"#e5e7eb"}`,borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:wl.has(sheet)?G:N,cursor:"pointer",fontFamily:"system-ui"}}>
               {wl.has(sheet)?"✓ In Watchlist":"⭐ Add to Watchlist"}
             </button>
-            <button onClick={()=>{setChatOpen(true);chatOpenRef.current=true;}} style={{flex:1,background:N,border:"none",borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:"white",cursor:"pointer",fontFamily:"system-ui"}}>
+            <button onClick={()=>setChatOpen(true)} style={{flex:1,background:N,border:"none",borderRadius:12,padding:13,fontSize:13,fontWeight:600,color:"white",cursor:"pointer",fontFamily:"system-ui"}}>
               🧠 Ask ARIA
             </button>
           </div>
@@ -766,7 +761,50 @@ export default function App(){
   };
 
   // ── ARIA CHAT ─────────────────────────────────────────────────
-
+  const Chat=()=>{
+    if(!chatOpen)return null;
+    return<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:500,backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end"}}>
+      <div style={{background:W,borderRadius:"24px 24px 0 0",border:"1px solid #e5e7eb",width:"100%",height:"70dvh",display:"flex",flexDirection:"column"}}>
+        <div style={{padding:"12px 20px",borderBottom:"1px solid #f3f4f6",display:"flex",justifyContent:"space-between",alignItems:"center",background:"white",borderRadius:"24px 24px 0 0"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:N,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:10,fontWeight:700,color:"#00e676"}}>AI</div>
+            <div>
+              <div style={{fontFamily:"system-ui",fontWeight:700,fontSize:14,color:N}}>Ask ARIA</div>
+              <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af"}}>Llama 3.3 70B · {sheet||"Market"} context</div>
+            </div>
+          </div>
+          <div onClick={()=>setChatOpen(false)} style={{width:28,height:28,borderRadius:"50%",background:"#f3f4f6",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:12,color:"#6b7280"}}>✕</div>
+        </div>
+        <div style={{flex:1,overflowY:"auto",padding:"16px 20px",display:"flex",flexDirection:"column",gap:12}}>
+          {chatHistory.length===0&&<div style={{textAlign:"center",padding:32}}>
+            <div style={{fontSize:32,marginBottom:12}}>🧠</div>
+            <div style={{fontFamily:"system-ui",fontWeight:600,fontSize:16,color:N,marginBottom:8}}>Ask me anything about the market</div>
+            <div style={{fontSize:12,color:"#9ca3af",lineHeight:1.6}}>Try: "Should I buy NVDA now?" or "What's the outlook for tech stocks?" or "Explain why META is dropping"</div>
+          </div>}
+          {chatHistory.map((m,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+              <div style={{maxWidth:"85%",background:m.role==="user"?N:"white",border:m.role==="user"?"none":"1px solid #f3f4f6",borderRadius:m.role==="user"?"18px 18px 4px 18px":"18px 18px 18px 4px",padding:"10px 14px",fontSize:12,color:m.role==="user"?"white":N,lineHeight:1.6,whiteSpace:"pre-wrap"}}>
+                {m.content}
+              </div>
+            </div>
+          ))}
+          {chatLoading&&<div style={{display:"flex",gap:4,padding:"4px 14px"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"#d1d5db",animation:"blink 1s .0s infinite"}}/>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"#d1d5db",animation:"blink 1s .2s infinite"}}/>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"#d1d5db",animation:"blink 1s .4s infinite"}}/>
+          </div>}
+        </div>
+        <div style={{padding:"12px 16px",borderTop:"1px solid #f3f4f6",display:"flex",gap:8,background:"white"}}>
+          <input value={chatInput} onChange={e=>{e.stopPropagation();setChatInput(e.target.value);}}
+            onKeyDown={e=>{e.stopPropagation();if(e.key==="Enter"&&!e.shiftKey)sendChat();}}
+            placeholder={`Ask about ${sheet||"the market"}...`}
+            style={{flex:1,border:"1px solid #e5e7eb",borderRadius:24,padding:"10px 16px",fontSize:13,color:N,outline:"none",fontFamily:"system-ui",background:"#f9fafb"}}/>
+          <button onClick={sendChat} disabled={!chatInput.trim()||chatLoading}
+            style={{width:42,height:42,borderRadius:"50%",background:N,border:"none",color:"white",fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
+        </div>
+      </div>
+    </div>;
+  };
 
   // ── MAIN RENDER ───────────────────────────────────────────────
   return(
@@ -811,7 +849,7 @@ export default function App(){
               <div style={{flex:1}}>
                 <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:2,marginBottom:5}}>ARIA · AI ANALYST · DAILY BRIEF</div>
                 <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:"0 14px 14px 14px",padding:"11px 14px",fontSize:12,color:N,lineHeight:1.65,boxShadow:"0 1px 3px rgba(0,0,0,.04)"}}>
-                  {ariaLines[ariaIdx]&&<span style={{fontFamily:'system-ui',fontSize:13,color:'#374151',lineHeight:1.6}}>{ariaLines[ariaIdx].replace(/\*\*(.*?)\*\*/g,'$1')}</span>}
+                  {ariaLines[ariaIdx]&&<TypeText text={ariaLines[ariaIdx].replace(/\*\*(.*?)\*\*/g,'$1')} speed={20}/>}
                 </div>
                 {ariaLines.length>1&&<div style={{display:"flex",gap:4,marginTop:7}}>
                   {ariaLines.map((_,i)=><div key={i} style={{width:i===ariaIdx?14:4,height:3,borderRadius:2,background:i===ariaIdx?N:"#e5e7eb",transition:"width .3s"}}/>)}
@@ -1079,7 +1117,7 @@ export default function App(){
       </div>
 
       <Sheet/>
-      <AriaChat open={chatOpen} onClose={()=>{setChatOpen(false);chatOpenRef.current=false;}} sheet={sheet} token={getToken()}/>
+      <Chat/>
 
       {toast&&<div style={{position:"fixed",bottom:"calc(68px + env(safe-area-inset-bottom,20px))",left:"50%",transform:"translateX(-50%)",background:N,borderRadius:22,padding:"9px 18px",fontFamily:"monospace",fontSize:11,color:"white",zIndex:600,whiteSpace:"nowrap",boxShadow:"0 4px 12px rgba(0,0,0,.15)"}}>{toast}</div>}
 
