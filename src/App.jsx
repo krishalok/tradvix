@@ -51,7 +51,7 @@ const SP500_TOP20=[
 ];
 
 // ── UTILS ─────────────────────────────────────────────────────
-const fp=v=>v?`$${Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`:"--";
+const fp=v=>v?"$"+Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"--";
 const fc=v=>v!=null?`${v>=0?"+":""}${v.toFixed(2)}%`:"--";
 const fv=v=>{if(!v||v===0)return"N/A";if(v>=1e9)return`${(v/1e9).toFixed(1)}B`;if(v>=1e6)return`${(v/1e6).toFixed(1)}M`;return`${(v/1e3).toFixed(0)}K`;};
 const fb=v=>{if(!v||v===0)return"N/A";if(v>=1e12)return`$${(v/1e12).toFixed(2)}T`;if(v>=1e9)return`$${(v/1e9).toFixed(1)}B`;return`$${(v/1e6).toFixed(0)}M`;};
@@ -324,12 +324,59 @@ function AriaChat({open,onClose,sheet,tokenRef}){
           <button type="submit" disabled={busy} style={{width:46,height:46,borderRadius:"50%",background:busy?"#9ca3af":N,border:"none",color:"white",fontSize:20,cursor:busy?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>↑</button>
         </form>
       </div>
-      <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}`}</style>
+      <style>{"@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}"}</style>
     </div>
   );
 }
 
 // ── MAIN APP ──────────────────────────────────────────────────
+
+// ── PROMPT BUILDERS (outside component to avoid JSX parser issues) ──
+function buildResearchPrompt(q, mktCtx) {
+  return "You are ARIA, Fintel Quantum's Chief Research Economist trained in the tradition of Eugene Fama (Efficient Markets), Robert Shiller (behavioral finance), Harry Markowitz (Modern Portfolio Theory), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.\n\n" +
+    "LIVE MARKET DATA: " + mktCtx + "\n\n" +
+    "RESEARCH QUERY: \"" + q + "\"\n\n" +
+    "Produce a structured research memorandum:\n\n" +
+    "EXECUTIVE SUMMARY\n[2-3 sentences. Precise thesis with conviction. No hedging.]\n\n" +
+    "ECONOMIC FRAMEWORK APPLIED\n[State the specific model: IS-LM, Fama-French 3-Factor, Phillips Curve, Porters Five Forces, Solow Growth Model, CAPM, etc. Explain why this is optimal.]\n\n" +
+    "QUANTITATIVE ANALYSIS\n[Apply rigorously with real numbers, ratios, percentages. Reference live macro data above.]\n\n" +
+    "KEY FINDINGS\n" +
+    "- Specific data point + implication\n" +
+    "- Specific data point + implication\n" +
+    "- Specific data point + implication\n" +
+    "- Specific data point + implication\n" +
+    "- Specific data point + implication\n\n" +
+    "MARKET IMPLICATIONS\n[Capital allocation implications. Specific sectors, securities. Concrete directional views with magnitude.]\n\n" +
+    "RISK SCENARIOS\n" +
+    "Bull Case (probability): trigger + magnitude + timeline\n" +
+    "Base Case (probability): most likely outcome + magnitude\n" +
+    "Bear Case (probability): downside risk + magnitude + trigger\n\n" +
+    "RESEARCH CONCLUSION\nConviction: HIGH / MEDIUM / LOW\n[Definitive conclusion with specific actionable insight]\n\n" +
+    "For informational and research purposes only. Not financial advice.";
+}
+
+function buildReportPrompt(sec, sectorData, mktCtx, stockCtx) {
+  var today = new Date().toDateString();
+  return "You are ARIA, Chief Research Economist at Fintel Quantum. You write institutional research in the tradition of Goldman Sachs Global Investment Research, JP Morgan Markets, and the IMF World Economic Outlook.\n\n" +
+    "SECTOR: " + sec + " | ETF: " + (sectorData.etf||"N/A") + " | Performance: " + (sectorData.change ? sectorData.change.toFixed(2) : "0") + "%\n" +
+    "MACRO: " + mktCtx + "\n" +
+    "HOLDINGS: " + (stockCtx||"Loading...") + "\n" +
+    "DATE: " + today + "\n\n" +
+    "FINTEL QUANTUM INSTITUTIONAL RESEARCH\n" +
+    sec.toUpperCase() + " SECTOR MONTHLY REPORT\n\n" +
+    "EXECUTIVE SUMMARY\n[3-4 sentences. Sector thesis, key metric, catalyst, conviction.]\n\n" +
+    "SECTOR PERFORMANCE\n[Quantitative analysis vs benchmark, breadth, volatility, cycle positioning.]\n\n" +
+    "MACRO LINKAGES\n[How Fed policy, inflation, growth impact this sector specifically.]\n\n" +
+    "HOLDINGS ANALYSIS\n[For each stock: business model, valuation, catalyst, risk. Be specific.]\n\n" +
+    "THEMATIC OPPORTUNITIES\n[2-3 high-conviction themes with market sizes and timelines.]\n\n" +
+    "RISK ASSESSMENT\n" +
+    "- Risk 1: specific, probability, magnitude\n" +
+    "- Risk 2: specific, probability, magnitude\n" +
+    "- Risk 3: specific, probability, magnitude\n\n" +
+    "SECTOR RECOMMENDATION\n12-Month View: OVERWEIGHT / NEUTRAL / UNDERWEIGHT\nConviction: HIGH / MEDIUM / LOW\n\n" +
+    "For informational and research purposes only. Not financial advice.";
+}
+
 export default function App(){
   const [user,setUser]=useState(()=>getUser());
   const [showAuth,setShowAuth]=useState(()=>window.location.search.includes("auth=1"));
@@ -422,7 +469,7 @@ export default function App(){
         setAriaLines([
           `Market sentiment is **${sentiment}** today — ${upPct}% of stocks are advancing.`,
           `Top gainer: ${gData?.[0]?.symbol||"N/A"} +${gData?.[0]?.changesPercentage?.toFixed(1)||0}% · Top loser: ${lData?.[0]?.symbol||"N/A"} ${lData?.[0]?.changesPercentage?.toFixed(1)||0}%`,
-          `${Object.keys(secData||{}).length} sectors tracked. ${Object.values(secData||{}).filter(s=>s.change>0).length} advancing, ${Object.values(secData||{}).filter(s=>s.change<0).length} declining.`,
+          Object.keys(secData||{}).length+" sectors tracked. "+Object.values(secData||{}).filter(s=>s.change>0).length+" advancing, "+Object.values(secData||{}).filter(s=>s.change<0).length+" declining.",
           `ARIA recommends reviewing earnings calendar: ${earnData?.slice(0,3).map(e=>e.symbol).join(", ")||"No upcoming"} reporting soon.`,
         ]);
         await new Promise(r=>setTimeout(r,300));
@@ -576,47 +623,7 @@ export default function App(){
     const mktCtx="SPY: $"+(data["SPY"]?.c?.toFixed(2)||"N/A")+" ("+(data["SPY"]?.dp?.toFixed(2)||0)+"%), QQQ: $"+(data["QQQ"]?.c?.toFixed(2)||"N/A")+" ("+(data["QQQ"]?.dp?.toFixed(2)||0)+"%). Fed Rate: "+(macro["Fed Rate"]?.value||5.33)+"%, CPI: "+(macro["Inflation"]?.value||2.7)+"%, GDP: "+(macro["GDP Growth"]?.value||2.4)+"%, Unemployment: "+(macro["Unemployment"]?.value||4.2)+"%. Breadth: "+upPct+"% advancing.";
     try{
       const r=await apiPost("/api/chat",{
-        message:`You are ARIA, Fintel Quantum's Chief Research Economist — trained in the tradition of Eugene Fama (Efficient Markets Hypothesis), Robert Shiller (behavioral finance & CAPE ratio), Harry Markowitz (Modern Portfolio Theory), Kenneth Arrow (general equilibrium), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.
-
-LIVE MARKET DATA: ${mktCtx}
-
-RESEARCH QUERY: "${q}"
-
-Produce a structured research memorandum:
-
-━━━ FINTEL QUANTUM RESEARCH MEMORANDUM ━━━
-${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
-
-EXECUTIVE SUMMARY
-[2-3 sentences. Precise thesis with conviction. No hedging.]
-
-ECONOMIC FRAMEWORK APPLIED
-[State the specific model — IS-LM, Fama-French 3-Factor, Phillips Curve, Porter's Five Forces, Solow Growth Model, CAPM, Black-Scholes, etc. Explain why this is the optimal framework.]
-
-QUANTITATIVE ANALYSIS
-[Apply rigorously. Use real numbers, ratios, percentages. Reference the live macro data above. Show your analytical reasoning step by step.]
-
-KEY FINDINGS
-• [Specific data point + implication]
-• [Specific data point + implication]
-• [Specific data point + implication]
-• [Specific data point + implication]
-• [Specific data point + implication]
-
-MARKET IMPLICATIONS
-[Capital allocation implications. Which sectors, securities benefit or suffer. Concrete directional views with magnitude.]
-
-RISK SCENARIOS
-▲ Bull Case (probability %): [trigger + magnitude + timeline]
-▬ Base Case (probability %): [outcome + magnitude]
-▼ Bear Case (probability %): [downside risk + magnitude + trigger]
-
-RESEARCH CONCLUSION
-Conviction: HIGH / MEDIUM / LOW
-[Definitive conclusion with specific actionable insight]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-For informational and research purposes only. Not financial advice. AI-generated analysis should be independently verified.`,
+        message:buildResearchPrompt(q, mktCtx),
         symbol:null,history:[]
       });
       const result=r.response||"Research unavailable";
@@ -658,48 +665,7 @@ For informational and research purposes only. Not financial advice. AI-generated
     const stockCtx=sectorStocks.map(x=>x.s+": $"+(x.q?.c?.toFixed(2)||"N/A")+" ("+(x.q?.dp?.toFixed(2)||0)+"%, FQ Score: "+(x.sc?.total||"N/A")+")").join(" | ");
     try{
       const r=await apiPost("/api/chat",{
-        message:`You are ARIA, Chief Research Economist at Fintel Quantum. You write institutional research in the tradition of Goldman Sachs Global Investment Research, JP Morgan Markets, and the IMF World Economic Outlook — rigorous, data-driven, and actionable.
-
-SECTOR: ${sec} | ETF: ${sectorData.etf||"N/A"} | Performance: ${sectorData.change?.toFixed(2)||0}%
-MACRO: ${mktCtx}
-HOLDINGS DATA: ${stockCtx||"Loading..."}
-DATE: ${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   FINTEL QUANTUM INSTITUTIONAL RESEARCH
-   ${sec.toUpperCase()} SECTOR — MONTHLY REPORT
-   ${new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"})}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-EXECUTIVE SUMMARY
-[3-4 sentences. Sector thesis, key performance metric, primary catalyst, conviction.]
-
-SECTOR PERFORMANCE & POSITIONING
-[Quantitative analysis: absolute return, relative to benchmark, breadth, volatility. Industry cycle positioning — early/mid/late cycle. Duration and factor exposure.]
-
-MACRO LINKAGES
-[How Fed policy, inflation, and growth specifically impact this sector. Apply relevant theory: duration sensitivity, pricing power, cyclicality, operating leverage.]
-
-INDIVIDUAL HOLDINGS ANALYSIS
-[For each stock in data: business model, valuation vs peers, near-term catalyst, key risk. Specific numbers required.]
-
-THEMATIC OPPORTUNITIES
-[2-3 high-conviction sector themes with addressable market sizes and timeline.]
-
-RISK ASSESSMENT
-• Risk 1: [specific, probability, magnitude]
-• Risk 2: [specific, probability, magnitude]
-• Risk 3: [specific, probability, magnitude]
-
-SECTOR RECOMMENDATION
-12-Month View: OVERWEIGHT / NEUTRAL / UNDERWEIGHT
-Conviction: HIGH / MEDIUM / LOW
-Primary Catalyst: [specific event]
-Key Risk: [single biggest threat]
-
-[2-sentence conclusion]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚖️ For informational and research purposes only. Not financial advice. AI-generated research should be independently verified.`,
+        message:buildReportPrompt(sec, sectorData, mktCtx, stockCtx),
         symbol:null,history:[]
       });
       setReportResult({sector:sec,content:r.response,date:new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})});
@@ -965,14 +931,7 @@ Key Risk: [single biggest threat]
   // ── MAIN RENDER ───────────────────────────────────────────────
   return(
     <>
-    <style>{`
-      @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-      @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
-      *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-      html,body{height:100%;background:${W}}
-      *{scrollbar-width:none}
-      *::-webkit-scrollbar{display:none}
-    `}</style>
+    <style>{{"\n      @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}\n      @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}\n      *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}\n      html,body{height:100%;background:"+W+"}\n      *{scrollbar-width:none}\n      *::-webkit-scrollbar{display:none}\n    "}}</style>
     <div style={{background:W,color:N,fontFamily:"system-ui,-apple-system,sans-serif",height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
       {/* HEADER */}
@@ -1052,7 +1011,7 @@ Key Risk: [single biggest threat]
             <span style={{fontSize:18}}>📅</span>
             <div>
               <div style={{fontFamily:"monospace",fontSize:8,color:A,letterSpacing:1.5,marginBottom:3}}>EARNINGS THIS WEEK</div>
-              <div style={{fontSize:12,color:N,fontWeight:500}}>{earnings.slice(0,3).map(e=>`${e.symbol} ${new Date(e.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}`).join(" · ")}</div>
+              <div style={{fontSize:12,color:N,fontWeight:500}}>{earnings.slice(0,3).map(e=>e.symbol+" "+new Date(e.date).toDateString().slice(4,10)).join(" · ")}</div>
             </div>
           </div>}
 
