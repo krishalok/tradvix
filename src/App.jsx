@@ -1566,6 +1566,8 @@ export default function App(){
         </div>
       </div>}
 
+      </div>
+
       {/* BOTTOM NAV */}
       <div style={{height:56,background:"white",borderTop:"1px solid #f3f4f6",display:"flex",flexShrink:0,position:"relative",zIndex:100}}>
         {[
