@@ -931,7 +931,14 @@ export default function App(){
   // ── MAIN RENDER ───────────────────────────────────────────────
   return(
     <>
-    <style>{{"\n      @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}\n      @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}\n      *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}\n      html,body{height:100%;background:"+W+"}\n      *{scrollbar-width:none}\n      *::-webkit-scrollbar{display:none}\n    "}}</style>
+    <style>{`
+      @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+      @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+      *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+      html,body{height:100%;background:#fafaf8}
+      *{scrollbar-width:none}
+      *::-webkit-scrollbar{display:none}
+    `}</style>
     <div style={{background:W,color:N,fontFamily:"system-ui,-apple-system,sans-serif",height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
       {/* HEADER */}
