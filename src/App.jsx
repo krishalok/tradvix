@@ -171,6 +171,17 @@ function AuthScreen({onAuth}){
   const submit=async(e)=>{
     e?.preventDefault();
     setError("");setLoading(true);
+    // Forgot password mode
+    if(mode==="forgot"){
+      try{
+        await new Promise(r=>setTimeout(r,1000)); // simulate API call
+        setError("");
+        setLoading(false);
+        alert("If an account exists for "+email+", a password reset link has been sent. Please check your email.\n\nNote: Password reset email functionality requires email service configuration.");
+        setMode("login");
+        return;
+      }catch{setError("Failed to send reset email.");setLoading(false);return;}
+    }
     try{
       const endpoint=mode==="signup"?"/auth/signup":"/auth/login";
       const body=mode==="signup"?{name,email,password}:{email,password};
@@ -194,8 +205,8 @@ function AuthScreen({onAuth}){
         </div>
       </div>
       <div style={{background:"white",borderRadius:20,padding:"32px 28px",width:"100%",maxWidth:400,boxShadow:"0 4px 24px rgba(0,0,0,.08)",border:"1px solid #f3f4f6"}}>
-        <h2 style={{fontSize:22,fontWeight:800,color:N,marginBottom:6}}>{mode==="login"?"Welcome back":"Create your account"}</h2>
-        <p style={{fontSize:13,color:"#9ca3af",marginBottom:24}}>Sign {mode==="login"?"in to":"up for"} your FINTEL QUANTUM account</p>
+        <h2 style={{fontSize:22,fontWeight:800,color:N,marginBottom:6}}>{mode==="login"?"Welcome back":mode==="forgot"?"Reset Password":"Create your account"}</h2>
+        <p style={{fontSize:13,color:"#9ca3af",marginBottom:24}}>{mode==="forgot"?"Enter your email to receive a reset link":"Sign "+(mode==="login"?"in to":"up for")+" your FINTEL QUANTUM account"}</p>
         <form onSubmit={submit}>
           {mode==="signup"&&<div style={{marginBottom:16}}>
             <label style={{fontSize:13,fontWeight:600,color:N,display:"block",marginBottom:6}}>Full Name</label>
@@ -215,7 +226,10 @@ function AuthScreen({onAuth}){
           </button>
         </form>
         <div style={{textAlign:"center",marginTop:18,fontSize:13,color:"#9ca3af"}}>
-          {mode==="login"?<>Don't have an account? <span onClick={()=>setMode("signup")} style={{color:N,fontWeight:700,cursor:"pointer"}}>Sign up free</span></>:<>Already have an account? <span onClick={()=>setMode("login")} style={{color:N,fontWeight:700,cursor:"pointer"}}>Sign in</span></>}
+          {mode==="login"&&<div style={{textAlign:"center",marginTop:12}}>
+            <span onClick={()=>setMode("forgot")} style={{color:"#9ca3af",fontSize:13,cursor:"pointer"}}>Forgot password?</span>
+          </div>}
+        {mode==="login"?<>Don't have an account? <span onClick={()=>setMode("signup")} style={{color:N,fontWeight:700,cursor:"pointer"}}>Sign up free</span></>:<>Already have an account? <span onClick={()=>setMode("login")} style={{color:N,fontWeight:700,cursor:"pointer"}}>Sign in</span></>}
         </div>
         {mode==="signup"&&<div style={{textAlign:"center",marginTop:14,padding:"10px",background:"#f0fdf4",borderRadius:8,fontSize:11,color:G}}>✓ Free forever · No credit card required · Cancel anytime</div>}
       </div>
@@ -223,6 +237,61 @@ function AuthScreen({onAuth}){
     </div>
   );
 }
+
+// ── PROFILE PANEL ─────────────────────────────────────────────
+function ProfilePanel({user,onClose,onLogout}){
+  const tiers={free:"Free",research:"Research $19/mo",professional:"Professional $49/mo",enterprise:"Enterprise $500/mo"};
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:8000,display:"flex",flexDirection:"column",justifyContent:"flex-end",background:"rgba(0,0,0,.5)",backdropFilter:"blur(8px)"}}>
+      <div style={{background:"white",borderRadius:"24px 24px 0 0",padding:"24px 20px 40px",boxShadow:"0 -4px 32px rgba(0,0,0,.15)"}}>
+        <div style={{width:36,height:4,background:"#e5e7eb",borderRadius:2,margin:"0 auto 20px"}}/>
+        {/* Avatar */}
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:24,padding:"16px",background:"#f9fafb",borderRadius:14}}>
+          <div style={{width:52,height:52,borderRadius:"50%",background:"#0f172a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"#22c55e",fontFamily:"monospace",flexShrink:0}}>
+            {user?.name?.charAt(0)?.toUpperCase()||"U"}
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontWeight:800,fontSize:16,color:"#0f172a"}}>{user?.name||"User"}</div>
+            <div style={{fontSize:12,color:"#9ca3af",marginTop:2}}>{user?.email||""}</div>
+            <div style={{fontFamily:"monospace",fontSize:10,padding:"3px 8px",borderRadius:6,background:"#dcfce7",color:"#15803d",fontWeight:700,display:"inline-block",marginTop:5}}>{(tiers[user?.tier]||"Free").toUpperCase()}</div>
+          </div>
+        </div>
+        {/* Plan info */}
+        <div style={{marginBottom:20}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>YOUR PLAN</div>
+          {[
+            {plan:"Free",price:"$0/mo",features:"Basic market data · FQ Score",current:user?.tier==="free"},
+            {plan:"Research",price:"$19/mo",features:"Expert AI · ARIA Chat · Reports",current:user?.tier==="research"},
+            {plan:"Professional",price:"$49/mo",features:"Deep analysis · All features",current:user?.tier==="professional"},
+            {plan:"Enterprise",price:"$500/mo",features:"Platform + API + Custom reports",current:user?.tier==="enterprise"},
+          ].map(p=>(
+            <div key={p.plan} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",borderRadius:10,marginBottom:6,background:p.current?"#f0fdf4":"white",border:"1px solid "+(p.current?"#bbf7d0":"#f3f4f6")}}>
+              <div>
+                <div style={{fontWeight:600,fontSize:13,color:"#0f172a"}}>{p.plan}</div>
+                <div style={{fontSize:11,color:"#9ca3af"}}>{p.features}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:p.current?"#15803d":"#0f172a"}}>{p.price}</div>
+                {p.current&&<div style={{fontSize:9,color:"#15803d",fontFamily:"monospace"}}>CURRENT</div>}
+                {!p.current&&<div style={{fontSize:10,color:"#9ca3af",cursor:"pointer"}}>Upgrade →</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Actions */}
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <button onClick={onClose} style={{padding:"13px",background:"#0f172a",border:"none",borderRadius:12,fontSize:14,fontWeight:700,color:"white",cursor:"pointer"}}>
+            Continue to App
+          </button>
+          <button onClick={onLogout} style={{padding:"13px",background:"white",border:"1px solid #fee2e2",borderRadius:12,fontSize:14,fontWeight:600,color:"#dc2626",cursor:"pointer"}}>
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // ── ARIA CHAT (standalone — lives outside App to prevent re-render) ──
 function AriaChat({open,onClose,sheet,tokenRef}){
@@ -331,6 +400,55 @@ function AriaChat({open,onClose,sheet,tokenRef}){
 
 // ── MAIN APP ──────────────────────────────────────────────────
 
+function buildConsultingPrompt(query, framework, mktData) {
+  var date = new Date().toDateString();
+  var frameworks = {
+    "McKinsey 7-S": "McKinsey 7-S Framework (Strategy, Structure, Systems, Shared Values, Skills, Style, Staff). Analyze all 7 elements and their interdependencies.",
+    "BCG Matrix": "BCG Growth-Share Matrix. Classify business units as Stars, Cash Cows, Question Marks, or Dogs. Provide strategic recommendations for each.",
+    "Porter 5 Forces": "Porter's Five Forces (Competitive rivalry, Supplier power, Buyer power, Threat of substitution, Threat of new entry). Quantify each force as Low/Medium/High with evidence.",
+    "MECE Framework": "MECE Principle (Mutually Exclusive, Collectively Exhaustive). Structure the problem into non-overlapping, complete categories. Build issue tree.",
+    "Blue Ocean": "Blue Ocean Strategy. Map current industry competition. Identify factors to Eliminate, Reduce, Raise, Create (ERRC grid). Define new value curve.",
+    "Jobs To Be Done": "Jobs-To-Be-Done Theory. Identify functional, emotional, and social jobs. Map customer struggles and desired outcomes. Find underserved job opportunities.",
+    "Value Chain": "Porter's Value Chain Analysis. Analyze primary activities (inbound logistics, operations, outbound, marketing, service) and support activities. Find competitive advantage sources.",
+    "Scenario Planning": "Shell Scenario Planning Method. Identify key uncertainties and driving forces. Build 2x2 matrix of scenarios. Develop strategic responses for each.",
+  };
+  var fw = frameworks[framework] || frameworks["McKinsey 7-S"];
+  return "You are a Senior Partner at Fintel Quantum Consulting, equivalent to a McKinsey Senior Partner or BCG Managing Director with 25+ years experience. You have advised Fortune 500 CEOs, sovereign wealth funds, and government ministries. Your analysis is rigorous, data-driven, and challenges conventional thinking.\n\n" +
+    "DATE: " + date + "\n" +
+    "MARKET CONTEXT: " + mktData + "\n\n" +
+    "CONSULTING FRAMEWORK: " + fw + "\n\n" +
+    "CLIENT PROBLEM STATEMENT: " + query + "\n\n" +
+    "Deliver a senior consulting engagement response with the following structure:\n\n" +
+    "SITUATION ASSESSMENT\n" +
+    "[Crisp 2-3 sentence reframe of the problem. Identify what is really being asked vs what was stated.]\n\n" +
+    "HYPOTHESIS\n" +
+    "[Your leading hypothesis before full analysis. State your initial answer with confidence.]\n\n" +
+    "FRAMEWORK APPLICATION\n" +
+    "[Apply " + framework + " rigorously. Use specific data, name companies, cite metrics. Show your analytical work. Challenge assumptions.]\n\n" +
+    "KEY INSIGHTS (MECE)\n" +
+    "Insight 1: [Counterintuitive finding with evidence]\n" +
+    "Insight 2: [Structural advantage or disadvantage identified]\n" +
+    "Insight 3: [Market dynamic others are missing]\n" +
+    "Insight 4: [Risk that appears as opportunity or vice versa]\n\n" +
+    "STRATEGIC OPTIONS\n" +
+    "Option A: [Bold move] - Upside: X% / Risk: Y / Timeline: Z\n" +
+    "Option B: [Incremental improvement] - Upside: X% / Risk: Y / Timeline: Z\n" +
+    "Option C: [Defensive position] - Upside: X% / Risk: Y / Timeline: Z\n\n" +
+    "RECOMMENDATION\n" +
+    "[Single clear recommendation. No hedging. State what you would tell the CEO.]\n\n" +
+    "IMPLEMENTATION ROADMAP\n" +
+    "30 days: [Immediate actions]\n" +
+    "90 days: [Quick wins]\n" +
+    "12 months: [Strategic milestones]\n\n" +
+    "FINANCIAL IMPACT\n" +
+    "[Quantify the recommendation: revenue impact, cost savings, or market share gain with specific numbers]\n\n" +
+    "RISK & MITIGATION\n" +
+    "[Top 3 risks with specific mitigation strategies]\n\n" +
+    "EXECUTIVE SUMMARY\n" +
+    "[2-sentence bottom line. What should the CEO do Monday morning?]\n\n" +
+    "For strategic consulting and informational purposes only. Not financial, legal, or investment advice.";
+}
+
 // ── PROMPT BUILDERS (outside component to avoid JSX parser issues) ──
 function buildResearchPrompt(q, mktCtx) {
   return "You are ARIA, Fintel Quantum's Chief Research Economist trained in the tradition of Eugene Fama (Efficient Markets), Robert Shiller (behavioral finance), Harry Markowitz (Modern Portfolio Theory), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.\n\n" +
@@ -408,6 +526,15 @@ export default function App(){
   const [research,setResearch]=useState({});
   // New features
   const [researchMode,setResearchMode]=useState(false);
+  // Consulting
+  const [consultingQuery,setConsultingQuery]=useState("");
+  const [consultingFramework,setConsultingFramework]=useState("McKinsey 7-S");
+  const [consultingResult,setConsultingResult]=useState(null);
+  const [consultingLoading,setConsultingLoading]=useState(false);
+  const [consultingHistory,setConsultingHistory]=useState([]);
+  // Auth extras
+  const [showForgotPassword,setShowForgotPassword]=useState(false);
+  const [showProfile,setShowProfile]=useState(false);
   const [valuationSym,setValuationSym]=useState("");
   const [valuationResult,setValuationResult]=useState(null);
   const [valuationLoading,setValuationLoading]=useState(false);
@@ -673,6 +800,27 @@ export default function App(){
       setReportResult({sector:sec,content:"Report generation failed. Please try again.",date:new Date().toLocaleDateString()});
     }
     setReportLoading(false);
+  };
+
+    // ── DEEP CONSULTING ENGINE ───────────────────────────────────
+  const generateConsulting=async()=>{
+    if(!consultingQuery.trim())return;
+    setConsultingLoading(true);
+    const q=consultingQuery.trim();
+    setConsultingQuery("");
+    const mktData="SPY: $"+(data["SPY"]?.c?.toFixed(2)||"N/A")+" ("+(data["SPY"]?.dp?.toFixed(2)||0)+"%), Fed Rate: "+(macro["Fed Rate"]?.value||5.33)+"%, GDP: "+(macro["GDP Growth"]?.value||2.4)+"%, Inflation: "+(macro["Inflation"]?.value||2.7)+"%.";
+    try{
+      const r=await apiPost("/api/chat",{
+        message:buildConsultingPrompt(q,consultingFramework,mktData),
+        symbol:null,history:[]
+      });
+      const result={q,framework:consultingFramework,result:r.response||"Unavailable",time:new Date().toLocaleTimeString()};
+      setConsultingResult(result);
+      setConsultingHistory(h=>[result,...h.slice(0,9)]);
+    }catch(e){
+      setConsultingResult({q,framework:consultingFramework,result:"Consulting engine temporarily unavailable.",time:new Date().toLocaleTimeString()});
+    }
+    setConsultingLoading(false);
   };
 
   // ── COMPUTED ──────────────────────────────────────────────────
@@ -961,7 +1109,7 @@ export default function App(){
           <button onClick={()=>{setChatOpen(true);chatOpenRef.current=true;}} style={{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:20,padding:"4px 12px",color:"white",fontSize:11,cursor:"pointer",fontFamily:"monospace",letterSpacing:.5,display:"flex",alignItems:"center",gap:5}}>
             🧠 ARIA
           </button>
-          <button onClick={logout} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,padding:"4px 10px",color:"rgba(255,255,255,.5)",fontSize:10,cursor:"pointer",fontFamily:"monospace"}}>
+          <button onClick={()=>setShowProfile(true)} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:20,padding:"4px 10px",color:"rgba(255,255,255,.5)",fontSize:10,cursor:"pointer",fontFamily:"monospace"}}>
             {user?.name?.split(" ")[0]||"Me"} ↗
           </button>
         </div>
@@ -1306,6 +1454,78 @@ export default function App(){
           </div>
         </div>}
 
+      {/* DEEP CONSULTING TAB */}
+      {tab==="consulting"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}}>
+        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>🎯 DEEP CONSULTING ENGINE</div>
+        <div style={{fontSize:11,color:"#9ca3af",marginBottom:16,fontFamily:"monospace"}}>McKinsey · BCG · Porter · Blue Ocean · MECE · Senior Partner level analysis</div>
+
+        {/* Framework Selector */}
+        <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16}}>
+          <div style={{fontWeight:700,fontSize:15,color:N,marginBottom:4}}>Select Consulting Framework</div>
+          <div style={{fontSize:12,color:"#9ca3af",marginBottom:14}}>Each framework produces a different analytical lens. Choose based on your problem type.</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:16}}>
+            {["McKinsey 7-S","BCG Matrix","Porter 5 Forces","MECE Framework","Blue Ocean","Jobs To Be Done","Value Chain","Scenario Planning"].map(fw=>(
+              <button key={fw} onClick={()=>setConsultingFramework(fw)} style={{padding:"7px 12px",borderRadius:20,border:"1px solid "+(consultingFramework===fw?N:"#e5e7eb"),background:consultingFramework===fw?N:"white",color:consultingFramework===fw?"white":"#6b7280",fontFamily:"monospace",fontSize:9,cursor:"pointer",fontWeight:consultingFramework===fw?700:400,transition:"all .15s"}}>{fw}</button>
+            ))}
+          </div>
+          <textarea value={consultingQuery} onChange={e=>setConsultingQuery(e.target.value)} placeholder="Describe your business problem or strategic question... e.g. How should we respond to a new competitor entering our market with a 40% lower price point? Or: Should we expand into Southeast Asia?" rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateConsulting();}}}/>
+          <button onClick={generateConsulting} disabled={consultingLoading||!consultingQuery.trim()} style={{width:"100%",padding:"13px",background:consultingLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:consultingLoading?"not-allowed":"pointer",fontFamily:"system-ui"}}>
+            {consultingLoading?"🔄 Senior Partner is analyzing...":"🎯 Get Senior Partner Analysis (Ctrl+Enter)"}
+          </button>
+        </div>
+
+        {/* Result */}
+        {consultingResult&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:G,letterSpacing:2,fontWeight:700}}>SENIOR PARTNER ANALYSIS · {consultingResult.framework}</div>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af"}}>{consultingResult.time}</div>
+          </div>
+          <div style={{fontSize:11,fontWeight:600,color:N,marginBottom:12,padding:"8px 12px",background:"#f9fafb",borderRadius:8,lineHeight:1.5}}>{consultingResult.q}</div>
+          <div style={{fontSize:13,color:N,lineHeight:1.9,whiteSpace:"pre-wrap",fontFamily:"system-ui"}}>{consultingResult.result}</div>
+        </div>}
+
+        {/* Framework Guide */}
+        {!consultingResult&&<div>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>FRAMEWORK SELECTION GUIDE</div>
+          {[
+            {fw:"McKinsey 7-S",use:"Organizational transformation, culture change, M&A integration",icon:"🏢"},
+            {fw:"BCG Matrix",use:"Portfolio strategy, resource allocation across business units",icon:"📊"},
+            {fw:"Porter 5 Forces",use:"Market entry, competitive positioning, industry attractiveness",icon:"⚔️"},
+            {fw:"MECE Framework",use:"Problem structuring, root cause analysis, issue trees",icon:"🔲"},
+            {fw:"Blue Ocean",use:"Innovation strategy, creating new market space, differentiation",icon:"🌊"},
+            {fw:"Jobs To Be Done",use:"Product strategy, customer research, growth opportunities",icon:"🎯"},
+            {fw:"Value Chain",use:"Operational efficiency, competitive advantage, outsourcing decisions",icon:"⛓️"},
+            {fw:"Scenario Planning",use:"Uncertainty management, long-term strategy, geopolitical risk",icon:"🔮"},
+          ].map((f,i)=>(
+            <div key={i} onClick={()=>{setConsultingFramework(f.fw);}} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer",display:"flex",gap:12,alignItems:"flex-start"}}>
+              <div style={{fontSize:22,flexShrink:0}}>{f.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:13,color:N,marginBottom:3}}>{f.fw}</div>
+                <div style={{fontSize:11,color:"#9ca3af",lineHeight:1.5}}>Best for: {f.use}</div>
+              </div>
+              <div style={{fontFamily:"monospace",fontSize:9,color:consultingFramework===f.fw?G:"#d1d5db",fontWeight:700}}>{consultingFramework===f.fw?"SELECTED":""}</div>
+            </div>
+          ))}
+        </div>}
+
+        {/* Consulting Prompts */}
+        <div style={{marginTop:16}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>SAMPLE STRATEGIC QUESTIONS</div>
+          {[
+            "Our main competitor just raised $500M. How should we respond strategically?",
+            "We are losing market share to digital-native competitors. What should our 3-year strategy be?",
+            "Should we acquire a smaller competitor or build the capability organically?",
+            "Our margins are compressing due to rising input costs. How do we protect profitability?",
+            "How should a mid-size bank respond to the threat from fintech and AI-native competitors?",
+            "We want to enter the US market from Europe. What is the optimal go-to-market strategy?",
+          ].map((p,i)=>(
+            <div key={i} onClick={()=>setConsultingQuery(p)} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"11px 14px",marginBottom:8,cursor:"pointer",fontSize:12,color:N,lineHeight:1.5}}>
+              → {p}
+            </div>
+          ))}
+        </div>
+      </div>}
+
       {/* MARKET RESEARCH TAB */}
       {tab==="research"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}}>
         <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>🔬 FINTEL QUANTUM RESEARCH ENGINE</div>
@@ -1574,6 +1794,7 @@ export default function App(){
           {id:"home",icon:"📊",label:"Markets"},
           {id:"sectors",icon:"🏭",label:"Sectors"},
           {id:"signals",icon:"🤖",label:"AI Board"},
+          {id:"consulting",icon:"🎯",label:"Consult"},
           {id:"research",icon:"🔬",label:"Research"},
           {id:"healthcare",icon:"🧬",label:"Health"},
           {id:"valuation",icon:"💎",label:"Value"},
@@ -1592,6 +1813,7 @@ export default function App(){
 
       {/* OVERLAYS */}
       <SheetView/>
+      {showProfile&&<ProfilePanel user={user} onClose={()=>setShowProfile(false)} onLogout={()=>{setShowProfile(false);logout();}}/>}
       {toast&&<div style={{position:"fixed",bottom:72,left:"50%",transform:"translateX(-50%)",background:N,color:"white",padding:"10px 20px",borderRadius:24,fontFamily:"system-ui",fontSize:13,fontWeight:600,zIndex:600,boxShadow:"0 4px 16px rgba(0,0,0,.2)",whiteSpace:"nowrap"}}>{toast}</div>}
 
     </div>
