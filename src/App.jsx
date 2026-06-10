@@ -573,7 +573,7 @@ export default function App(){
     setResearchQuery("");
     const entry={q,result:null,time:new Date().toLocaleTimeString()};
     setResearchHistory(h=>[entry,...h.slice(0,9)]);
-    const mktCtx=`SPY: $${data["SPY"]?.c?.toFixed(2)||"N/A"} (${data["SPY"]?.dp?.toFixed(2)||0}%), QQQ: $${data["QQQ"]?.c?.toFixed(2)||"N/A"} (${data["QQQ"]?.dp?.toFixed(2)||0}%). Fed Rate: ${macro["Fed Rate"]?.value||5.33}%, CPI: ${macro["Inflation"]?.value||2.7}%, GDP: ${macro["GDP Growth"]?.value||2.4}%, Unemployment: ${macro["Unemployment"]?.value||4.2}%. Breadth: ${upPct}% advancing.`;
+    const mktCtx="SPY: $"+(data["SPY"]?.c?.toFixed(2)||"N/A")+" ("+(data["SPY"]?.dp?.toFixed(2)||0)+"%), QQQ: $"+(data["QQQ"]?.c?.toFixed(2)||"N/A")+" ("+(data["QQQ"]?.dp?.toFixed(2)||0)+"%). Fed Rate: "+(macro["Fed Rate"]?.value||5.33)+"%, CPI: "+(macro["Inflation"]?.value||2.7)+"%, GDP: "+(macro["GDP Growth"]?.value||2.4)+"%, Unemployment: "+(macro["Unemployment"]?.value||4.2)+"%. Breadth: "+upPct+"% advancing.";
     try{
       const r=await apiPost("/api/chat",{
         message:`You are ARIA, Fintel Quantum's Chief Research Economist — trained in the tradition of Eugene Fama (Efficient Markets Hypothesis), Robert Shiller (behavioral finance & CAPE ratio), Harry Markowitz (Modern Portfolio Theory), Kenneth Arrow (general equilibrium), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.
@@ -654,8 +654,8 @@ For informational and research purposes only. Not financial advice. AI-generated
     setReportLoading(true);setReportResult(null);
     const sectorStocks=allQ.filter(x=>STOCKS.find(s=>s.s===x.s)?.sec===sec.toLowerCase()).slice(0,8);
     const sectorData=sectors[sec]||{};
-    const mktCtx=`Fed Rate: ${macro["Fed Rate"]?.value||5.33}%, Inflation: ${macro["Inflation"]?.value||2.7}%, GDP: ${macro["GDP Growth"]?.value||2.4}%, Unemployment: ${macro["Unemployment"]?.value||4.2}%. Breadth: ${upPct}% advancing.`;
-    const stockCtx=sectorStocks.map(x=>`${x.s}: $${x.q?.c?.toFixed(2)} (${x.q?.dp?.toFixed(2)}%, FQ Score: ${x.sc?.total||"N/A"})`).join(" | ");
+    const mktCtx="Fed Rate: "+(macro["Fed Rate"]?.value||5.33)+"%, Inflation: "+(macro["Inflation"]?.value||2.7)+"%, GDP: "+(macro["GDP Growth"]?.value||2.4)+"%, Unemployment: "+(macro["Unemployment"]?.value||4.2)+"%. Breadth: "+upPct+"% advancing.";
+    const stockCtx=sectorStocks.map(x=>x.s+": $"+(x.q?.c?.toFixed(2)||"N/A")+" ("+(x.q?.dp?.toFixed(2)||0)+"%, FQ Score: "+(x.sc?.total||"N/A")+")").join(" | ");
     try{
       const r=await apiPost("/api/chat",{
         message:`You are ARIA, Chief Research Economist at Fintel Quantum. You write institutional research in the tradition of Goldman Sachs Global Investment Research, JP Morgan Markets, and the IMF World Economic Outlook — rigorous, data-driven, and actionable.
@@ -961,77 +961,6 @@ Key Risk: [single biggest threat]
   };
 
   // ── VALUATION PANEL ───────────────────────────────────────────
-  const ValuationPanel=()=>(
-    <div style={{padding:"14px 16px 70px"}}>
-      <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:16}}>💎 COMPANY VALUATION GENERATOR</div>
-      <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:20,marginBottom:16}}>
-        <div style={{fontWeight:700,fontSize:16,color:N,marginBottom:6}}>AI-Powered Valuation</div>
-        <div style={{fontSize:12,color:"#6b7280",marginBottom:16,lineHeight:1.6}}>DCF analysis + comparable company multiples + Bull/Base/Bear scenarios. For research purposes only.</div>
-        <div style={{display:"flex",gap:10}}>
-          <input value={valuationSym} onChange={e=>setValuationSym(e.target.value.toUpperCase())} placeholder="Enter ticker (e.g. AAPL)" style={{flex:1,padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:14,color:N,outline:"none",fontFamily:"monospace"}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>e.key==="Enter"&&generateValuation()}/>
-          <button onClick={generateValuation} disabled={valuationLoading||!valuationSym.trim()} style={{padding:"12px 20px",background:valuationLoading?"#9ca3af":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:valuationLoading?"not-allowed":"pointer",fontFamily:"system-ui",whiteSpace:"nowrap"}}>
-            {valuationLoading?"Analyzing...":"Generate →"}
-          </button>
-        </div>
-      </div>
-      {valuationResult&&(
-        valuationResult.error?
-        <div style={{background:"#fef2f2",border:"1px solid #fecaca",borderRadius:12,padding:16,color:R,fontSize:13}}>{valuationResult.error}</div>
-        :<div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {/* Overview */}
-          <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
-            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>VALUATION OVERVIEW · {valuationResult.sym}</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-              {[
-                {l:"Current Price",v:fp(valuationResult.price)},{l:"DCF Value",v:fp(valuationResult.dcf)},{l:"Comps Value",v:fp(valuationResult.comps)},
-                {l:"P/E Ratio",v:valuationResult.pe?valuationResult.pe.toFixed(1)+"x":"N/A"},{l:"Market Cap",v:fb(valuationResult.mktCap)},{l:"Upside (Base)",v:`${valuationResult.upside>=0?"+":""}${valuationResult.upside}%`,c:valuationResult.upside>=0?G:R},
-              ].map(m=>(
-                <div key={m.l} style={{background:"#f9fafb",borderRadius:10,padding:"10px 12px"}}>
-                  <div style={{fontSize:9,color:"#9ca3af",fontFamily:"monospace",letterSpacing:1,marginBottom:4}}>{m.l}</div>
-                  <div style={{fontSize:14,fontWeight:700,color:m.c||N,fontFamily:"monospace"}}>{m.v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Scenarios */}
-          <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
-            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>PRICE SCENARIOS</div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-              {[
-                {l:"🐻 Bear",v:fp(valuationResult.bear),pct:(((valuationResult.bear-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:R,bg:"#fef2f2"},
-                {l:"📊 Base",v:fp(valuationResult.base),pct:(((valuationResult.base-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:A,bg:"#fffbeb"},
-                {l:"🐂 Bull",v:fp(valuationResult.bull),pct:(((valuationResult.bull-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:G,bg:"#f0fdf4"},
-              ].map(s=>(
-                <div key={s.l} style={{background:s.bg,borderRadius:10,padding:"12px",textAlign:"center"}}>
-                  <div style={{fontSize:11,color:s.col,fontWeight:700,marginBottom:6}}>{s.l}</div>
-                  <div style={{fontSize:16,fontWeight:800,color:s.col,fontFamily:"monospace"}}>{s.v}</div>
-                  <div style={{fontSize:11,color:s.col,fontFamily:"monospace",marginTop:4}}>{s.pct>=0?"+":""}{s.pct}%</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Assumptions */}
-          <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
-            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>DCF ASSUMPTIONS</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              {[
-                {l:"Revenue Growth",v:`${valuationResult.revGrowth}%`},
-                {l:"Operating Margin",v:`${valuationResult.margin}%`},
-                {l:"WACC",v:`${valuationResult.wacc}%`},
-                {l:"Terminal Growth",v:"2.5%"},
-              ].map(a=>(
-                <div key={a.l} style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",background:"#f9fafb",borderRadius:8}}>
-                  <span style={{fontSize:12,color:"#6b7280"}}>{a.l}</span>
-                  <span style={{fontSize:12,fontWeight:700,color:N,fontFamily:"monospace"}}>{a.v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",lineHeight:1.6}}>For informational and research purposes only. Not financial advice. Consult a qualified professional before making investment decisions.</div>
-        </div>
-      )}
-    </div>
-  );
 
   // ── MAIN RENDER ───────────────────────────────────────────────
   return(
