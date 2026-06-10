@@ -545,6 +545,170 @@ export default function App(){
     setValuationLoading(false);
   };
 
+  // ── CONSTANTS ────────────────────────────────────────────────
+  const HC_SYMBOLS=["LLY","JNJ","UNH","ABBV","MRK","PFE","AMGN","ISRG","BSX","VRTX","REGN","MRNA","GILD","BMY","BIIB"];
+  const HC_THEMES=[
+    {name:"GLP-1 / Obesity Revolution",leader:"LLY",mkt:"$150B+ by 2030",desc:"Oral and injectable GLP-1 agonists transforming metabolic disease. Orforglipron oral form expands market 5x.",momentum:"VERY HIGH"},
+    {name:"Alzheimer\'s Disease",leader:"LLY",mkt:"$15B+ by 2028",desc:"Donanemab and Lecanemab approved — first disease-modifying treatments. Blood biomarker testing accelerating early diagnosis.",momentum:"HIGH"},
+    {name:"Cancer Immunotherapy",leader:"BMY",mkt:"$200B+ by 2030",desc:"Checkpoint inhibitors, CAR-T, ADC technologies expanding. Combinations show 40%+ superior outcomes vs monotherapy.",momentum:"HIGH"},
+    {name:"Gene & Cell Therapy",leader:"VRTX",mkt:"$10B+ by 2028",desc:"CRISPR cures for sickle cell approved 2023. Platform applicable across 6,000+ rare genetic diseases.",momentum:"MEDIUM"},
+    {name:"Surgical Robotics & AI",leader:"ISRG",mkt:"$22B+ by 2028",desc:"Da Vinci dominates with >75% market share. AI-guided surgery reducing complications 35%.",momentum:"HIGH"},
+  ];
+  const FDA_PIPELINE=[
+    {drug:"Orforglipron",type:"Oral GLP-1 Agonist",company:"Eli Lilly (LLY)",phase:"Phase 3",date:"Q3 2026",indication:"Obesity / T2D",impact:"TRANSFORMATIVE",marketSize:"$80B+"},
+    {drug:"Donanemab",type:"Anti-amyloid mAb",company:"Eli Lilly (LLY)",phase:"Approved",date:"2024",indication:"Early Alzheimer\'s",impact:"HIGH",marketSize:"$15B"},
+    {drug:"Zilebesiran",type:"siRNA Therapy",company:"Alnylam/Roche",phase:"Phase 3",date:"Q4 2026",indication:"Hypertension",impact:"HIGH",marketSize:"$20B"},
+    {drug:"Tarlatamab",type:"BiTE Antibody",company:"Amgen (AMGN)",phase:"Approved",date:"2024",indication:"Small Cell Lung Cancer",impact:"MEDIUM",marketSize:"$3B"},
+    {drug:"NTLA-2002",type:"CRISPR In Vivo",company:"Intellia Therapeutics",phase:"Phase 3",date:"2027",indication:"Hereditary Angioedema",impact:"HIGH",marketSize:"$5B"},
+    {drug:"GLP-1+GIP Combo",type:"Dual Agonist",company:"Eli Lilly (LLY)",phase:"Phase 3",date:"Q1 2027",indication:"Obesity + Cardiometabolic",impact:"TRANSFORMATIVE",marketSize:"$100B+"},
+    {drug:"Dapagliflozin HF+",type:"SGLT2 Inhibitor",company:"AstraZeneca",phase:"sNDA Filed",date:"Q2 2026",indication:"Expanded Heart Failure",impact:"HIGH",marketSize:"$12B"},
+    {drug:"Miricorilant",type:"GR Antagonist",company:"Corcept Therapeutics",phase:"Phase 3",date:"Q3 2026",indication:"MASH/NASH",impact:"HIGH",marketSize:"$8B"},
+  ];
+
+  // ── MARKET RESEARCH ENGINE (Nobel-grade economic frameworks) ─
+  const generateResearch=async()=>{
+    if(!researchQuery.trim())return;
+    setResearchLoading(true);
+    const q=researchQuery.trim();
+    setResearchQuery("");
+    const entry={q,result:null,time:new Date().toLocaleTimeString()};
+    setResearchHistory(h=>[entry,...h.slice(0,9)]);
+    const mktCtx=`SPY: $${data["SPY"]?.c?.toFixed(2)||"N/A"} (${data["SPY"]?.dp?.toFixed(2)||0}%), QQQ: $${data["QQQ"]?.c?.toFixed(2)||"N/A"} (${data["QQQ"]?.dp?.toFixed(2)||0}%). Fed Rate: ${macro["Fed Rate"]?.value||5.33}%, CPI: ${macro["Inflation"]?.value||2.7}%, GDP: ${macro["GDP Growth"]?.value||2.4}%, Unemployment: ${macro["Unemployment"]?.value||4.2}%. Breadth: ${upPct}% advancing.`;
+    try{
+      const r=await apiPost("/api/chat",{
+        message:`You are ARIA, Fintel Quantum\'s Chief Research Economist — trained in the tradition of Eugene Fama (Efficient Markets Hypothesis), Robert Shiller (behavioral finance & CAPE ratio), Harry Markowitz (Modern Portfolio Theory), Kenneth Arrow (general equilibrium), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.
+
+LIVE MARKET DATA: ${mktCtx}
+
+RESEARCH QUERY: "${q}"
+
+Produce a structured research memorandum:
+
+━━━ FINTEL QUANTUM RESEARCH MEMORANDUM ━━━
+${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
+
+EXECUTIVE SUMMARY
+[2-3 sentences. Precise thesis with conviction. No hedging.]
+
+ECONOMIC FRAMEWORK APPLIED
+[State the specific model — IS-LM, Fama-French 3-Factor, Phillips Curve, Porter\'s Five Forces, Solow Growth Model, CAPM, Black-Scholes, etc. Explain why this is the optimal framework.]
+
+QUANTITATIVE ANALYSIS
+[Apply rigorously. Use real numbers, ratios, percentages. Reference the live macro data above. Show your analytical reasoning step by step.]
+
+KEY FINDINGS
+• [Specific data point + implication]
+• [Specific data point + implication]
+• [Specific data point + implication]
+• [Specific data point + implication]
+• [Specific data point + implication]
+
+MARKET IMPLICATIONS
+[Capital allocation implications. Which sectors, securities benefit or suffer. Concrete directional views with magnitude.]
+
+RISK SCENARIOS
+▲ Bull Case (probability %): [trigger + magnitude + timeline]
+▬ Base Case (probability %): [outcome + magnitude]
+▼ Bear Case (probability %): [downside risk + magnitude + trigger]
+
+RESEARCH CONCLUSION
+Conviction: HIGH / MEDIUM / LOW
+[Definitive conclusion with specific actionable insight]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For informational and research purposes only. Not financial advice. AI-generated analysis should be independently verified.`,
+        symbol:null,history:[]
+      });
+      const result=r.response||"Research unavailable";
+      setResearchResult({q,result,time:new Date().toLocaleTimeString()});
+      setResearchHistory(h=>h.map((item,i)=>i===0?{...item,result}:item));
+    }catch(e){
+      setResearchResult({q,result:"Research engine temporarily unavailable.",time:new Date().toLocaleTimeString()});
+    }
+    setResearchLoading(false);
+  };
+
+  // ── HEALTHCARE INTELLIGENCE ───────────────────────────────────
+  const loadHealthcare=async()=>{
+    if(healthcareLoaded)return;
+    setHealthcareLoading(true);
+    try{
+      const stocks=HC_SYMBOLS.map(sym=>{
+        const q=data[sym];const sc=scores[sym];
+        if(!q)return null;
+        return{sym,q,sc,stk:STOCKS.find(s=>s.s===sym)||{n:sym,e:"💊",sec:"health"}};
+      }).filter(Boolean).sort((a,b)=>(b.sc?.total||0)-(a.sc?.total||0));
+      const newsData=await api("/api/news").catch(()=>[]);
+      const healthNews=(Array.isArray(newsData)?newsData:[]).filter(n=>
+        n.title&&["pharma","biotech","FDA","drug","clinical","health","medical","Lilly","Pfizer","Merck","AbbVie","UnitedHealth","obesity","GLP","cancer","Alzheimer","CRISPR"].some(kw=>n.title.toLowerCase().includes(kw.toLowerCase()))
+      ).slice(0,10);
+      setHealthcareData({stocks,news:healthNews,fda:FDA_PIPELINE,themes:HC_THEMES});
+      setHealthcareLoaded(true);
+    }catch(e){console.error("Healthcare load error",e);}
+    setHealthcareLoading(false);
+  };
+
+  // ── INSTITUTIONAL REPORT GENERATOR ───────────────────────────
+  const generateReport=async(overrideSector)=>{
+    const sec=overrideSector||reportSector;
+    setReportLoading(true);setReportResult(null);
+    const sectorStocks=allQ.filter(x=>STOCKS.find(s=>s.s===x.s)?.sec===sec.toLowerCase()).slice(0,8);
+    const sectorData=sectors[sec]||{};
+    const mktCtx=`Fed Rate: ${macro["Fed Rate"]?.value||5.33}%, Inflation: ${macro["Inflation"]?.value||2.7}%, GDP: ${macro["GDP Growth"]?.value||2.4}%, Unemployment: ${macro["Unemployment"]?.value||4.2}%. Breadth: ${upPct}% advancing.`;
+    const stockCtx=sectorStocks.map(x=>`${x.s}: $${x.q?.c?.toFixed(2)} (${x.q?.dp?.toFixed(2)}%, FQ Score: ${x.sc?.total||"N/A"})`).join(" | ");
+    try{
+      const r=await apiPost("/api/chat",{
+        message:`You are ARIA, Chief Research Economist at Fintel Quantum. You write institutional research in the tradition of Goldman Sachs Global Investment Research, JP Morgan Markets, and the IMF World Economic Outlook — rigorous, data-driven, and actionable.
+
+SECTOR: ${sec} | ETF: ${sectorData.etf||"N/A"} | Performance: ${sectorData.change?.toFixed(2)||0}%
+MACRO: ${mktCtx}
+HOLDINGS DATA: ${stockCtx||"Loading..."}
+DATE: ${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FINTEL QUANTUM INSTITUTIONAL RESEARCH
+   ${sec.toUpperCase()} SECTOR — MONTHLY REPORT
+   ${new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"})}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EXECUTIVE SUMMARY
+[3-4 sentences. Sector thesis, key performance metric, primary catalyst, conviction.]
+
+SECTOR PERFORMANCE & POSITIONING
+[Quantitative analysis: absolute return, relative to benchmark, breadth, volatility. Industry cycle positioning — early/mid/late cycle. Duration and factor exposure.]
+
+MACRO LINKAGES
+[How Fed policy, inflation, and growth specifically impact this sector. Apply relevant theory: duration sensitivity, pricing power, cyclicality, operating leverage.]
+
+INDIVIDUAL HOLDINGS ANALYSIS
+[For each stock in data: business model, valuation vs peers, near-term catalyst, key risk. Specific numbers required.]
+
+THEMATIC OPPORTUNITIES
+[2-3 high-conviction sector themes with addressable market sizes and timeline.]
+
+RISK ASSESSMENT
+• Risk 1: [specific, probability, magnitude]
+• Risk 2: [specific, probability, magnitude]
+• Risk 3: [specific, probability, magnitude]
+
+SECTOR RECOMMENDATION
+12-Month View: OVERWEIGHT / NEUTRAL / UNDERWEIGHT
+Conviction: HIGH / MEDIUM / LOW
+Primary Catalyst: [specific event]
+Key Risk: [single biggest threat]
+
+[2-sentence conclusion]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚖️ For informational and research purposes only. Not financial advice. AI-generated research should be independently verified.`,
+        symbol:null,history:[]
+      });
+      setReportResult({sector:sec,content:r.response,date:new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})});
+    }catch(e){
+      setReportResult({sector:sec,content:"Report generation failed. Please try again.",date:new Date().toLocaleDateString()});
+    }
+    setReportLoading(false);
+  };
+
   // ── COMPUTED ──────────────────────────────────────────────────
   const allQ=STOCKS.map(s=>({...s,q:data[s.s],sc:scores[s.s]})).filter(x=>x.q);
   const adv=allQ.filter(x=>x.q.dp>=0).length,dec=allQ.filter(x=>x.q.dp<0).length;
@@ -1159,181 +1323,351 @@ export default function App(){
         </div>}
 
         {/* VALUATION TAB */}
-        {tab==="valuation"&&<div style={{position:"absolute",inset:0,overflowY:"auto"}}><ValuationPanel/></div>}
+        {tab==="valuation"&&<div style={{position:"absolute",inset:0,overflowY:"auto"}}>
+          <div style={{padding:"14px 16px 70px"}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>💎 COMPANY VALUATION GENERATOR</div>
+            <div style={{fontSize:11,color:"#9ca3af",marginBottom:16,fontFamily:"monospace"}}>DCF · Comparable Company Analysis · Bull/Base/Bear Scenarios</div>
 
-      </div>
+            <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
+              <div style={{fontWeight:700,fontSize:15,color:N,marginBottom:4}}>AI-Powered Valuation Model</div>
+              <div style={{fontSize:12,color:"#9ca3af",marginBottom:16,lineHeight:1.5}}>Institutional-grade DCF + comparable company multiples + scenario analysis. What investment banks charge $50,000 for — in 60 seconds.</div>
+              <div style={{display:"flex",gap:10}}>
+                <input value={valuationSym} onChange={e=>setValuationSym(e.target.value.toUpperCase())} placeholder="Enter ticker (e.g. AAPL, MSFT, NVDA)" style={{flex:1,padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:14,color:N,outline:"none",fontFamily:"monospace",background:"#f8fafc"}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>e.key==="Enter"&&generateValuation()}/>
+                <button onClick={generateValuation} disabled={valuationLoading||!valuationSym.trim()} style={{padding:"12px 20px",background:valuationLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:valuationLoading?"not-allowed":"pointer",fontFamily:"system-ui",whiteSpace:"nowrap",flexShrink:0}}>
+                  {valuationLoading?"Modeling...":"Value →"}
+                </button>
+              </div>
+              {/* Quick symbols */}
+              <div style={{display:"flex",gap:6,marginTop:10,flexWrap:"wrap"}}>
+                {["AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","JPM","LLY","XOM"].map(s=>(
+                  <button key={s} onClick={()=>setValuationSym(s)} style={{padding:"4px 10px",borderRadius:14,border:"1px solid #e5e7eb",background:valuationSym===s?N:"white",color:valuationSym===s?"white":"#6b7280",fontFamily:"monospace",fontSize:9,cursor:"pointer"}}>{s}</button>
+                ))}
+              </div>
+            </div>
+
+            {valuationResult&&(
+              valuationResult.error?
+              <div style={{background:"#fef2f2",border:"1px solid #fecaca",borderRadius:12,padding:16,color:R,fontSize:13}}>{valuationResult.error}</div>
+              :<div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {/* Header */}
+                <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
+                  <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>VALUATION OVERVIEW · {valuationResult.sym}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                    {[
+                      {l:"Current Price",v:fp(valuationResult.price)},
+                      {l:"DCF Intrinsic Value",v:fp(valuationResult.dcf),c:valuationResult.dcf>valuationResult.price?G:R},
+                      {l:"Comps Fair Value",v:fp(valuationResult.comps),c:valuationResult.comps>valuationResult.price?G:R},
+                      {l:"P/E Ratio",v:valuationResult.pe?valuationResult.pe.toFixed(1)+"x":"N/A"},
+                      {l:"Market Cap",v:fb(valuationResult.mktCap)},
+                      {l:"Base Upside",v:`${valuationResult.upside>=0?"+":""}${valuationResult.upside}%`,c:valuationResult.upside>=0?G:R},
+                    ].map(m=>(
+                      <div key={m.l} style={{background:"#f9fafb",borderRadius:10,padding:"10px 12px"}}>
+                        <div style={{fontSize:9,color:"#9ca3af",fontFamily:"monospace",letterSpacing:1,marginBottom:4}}>{m.l}</div>
+                        <div style={{fontSize:14,fontWeight:700,color:m.c||N,fontFamily:"monospace"}}>{m.v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Scenarios */}
+                <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
+                  <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>PRICE SCENARIOS (12-MONTH)</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                    {[
+                      {l:"🐻 Bear Case",v:fp(valuationResult.bear),pct:(((valuationResult.bear-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:R,bg:"#fef2f2",prob:"25%"},
+                      {l:"📊 Base Case",v:fp(valuationResult.base),pct:(((valuationResult.base-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:A,bg:"#fffbeb",prob:"50%"},
+                      {l:"🐂 Bull Case",v:fp(valuationResult.bull),pct:(((valuationResult.bull-valuationResult.price)/valuationResult.price)*100).toFixed(1),col:G,bg:"#f0fdf4",prob:"25%"},
+                    ].map(s=>(
+                      <div key={s.l} style={{background:s.bg,borderRadius:10,padding:"12px",textAlign:"center"}}>
+                        <div style={{fontSize:10,color:s.col,fontWeight:700,marginBottom:4}}>{s.l}</div>
+                        <div style={{fontSize:16,fontWeight:800,color:s.col,fontFamily:"monospace"}}>{s.v}</div>
+                        <div style={{fontSize:11,color:s.col,fontFamily:"monospace",marginTop:2}}>{s.pct>=0?"+":""}{s.pct}%</div>
+                        <div style={{fontSize:9,color:"#9ca3af",marginTop:4}}>P={s.prob}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* DCF Assumptions */}
+                <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16}}>
+                  <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>DCF MODEL ASSUMPTIONS</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                    {[
+                      {l:"Revenue Growth Rate",v:`${valuationResult.revGrowth}%`},
+                      {l:"Operating Margin",v:`${valuationResult.margin}%`},
+                      {l:"WACC (Discount Rate)",v:`${valuationResult.wacc}%`},
+                      {l:"Terminal Growth Rate",v:"2.5%"},
+                      {l:"FCF Conversion",v:"80%"},
+                      {l:"Projection Period",v:"10 Years"},
+                    ].map(a=>(
+                      <div key={a.l} style={{display:"flex",justifyContent:"space-between",padding:"8px 10px",background:"#f9fafb",borderRadius:8}}>
+                        <span style={{fontSize:11,color:"#6b7280"}}>{a.l}</span>
+                        <span style={{fontSize:12,fontWeight:700,color:N,fontFamily:"monospace"}}>{a.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{fontSize:10,color:"#9ca3af",textAlign:"center",lineHeight:1.6,padding:"0 10px"}}>⚖️ For informational and research purposes only. Not financial advice. Valuation models involve assumptions that may not reflect actual outcomes. Consult a qualified professional before making investment decisions.</div>
+              </div>
+            )}
+          </div>
+        </div>}
 
       {/* MARKET RESEARCH TAB */}
       {tab==="research"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}}>
-        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:4}}>🔬 MARKET RESEARCH ENGINE</div>
-        <div style={{fontSize:12,color:"#9ca3af",marginBottom:16}}>Ask any research question — ARIA generates institutional-grade analysis</div>
-        
+        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>🔬 FINTEL QUANTUM RESEARCH ENGINE</div>
+        <div style={{fontSize:11,color:"#9ca3af",marginBottom:16,fontFamily:"monospace"}}>Nobel-grade economic frameworks · Institutional research quality</div>
+
         {/* Research Input */}
-        <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16,marginBottom:16}}>
-          <div style={{fontWeight:700,fontSize:15,color:N,marginBottom:4}}>Ask ARIA Research</div>
-          <div style={{fontSize:12,color:"#9ca3af",marginBottom:14}}>
-            Try: "What is the outlook for AI semiconductors?" · "Compare GLP-1 drug pipeline across big pharma" · "Impact of Fed rate cuts on financials"
+        <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+            <div style={{width:30,height:30,borderRadius:"50%",background:N,display:"flex",alignItems:"center",justifyContent:"center",color:"#00e676",fontSize:10,fontWeight:800,fontFamily:"monospace",flexShrink:0}}>AI</div>
+            <div>
+              <div style={{fontWeight:700,fontSize:14,color:N}}>Ask ARIA — Chief Research Economist</div>
+              <div style={{fontSize:10,color:"#9ca3af"}}>Fama-French · IS-LM · CAPM · Porter · Solow · Black-Scholes</div>
+            </div>
           </div>
-          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder="Enter your research question..." rows={3} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:14,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
-          <button onClick={generateResearch} disabled={researchLoading||!researchQuery.trim()} style={{width:"100%",padding:"13px",background:researchLoading?"#9ca3af":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:researchLoading?"not-allowed":"pointer",fontFamily:"system-ui"}}>
-            {researchLoading?"🔄 ARIA is researching...":"🔬 Generate Research Report (Ctrl+Enter)"}
+          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder={"e.g. "What is the macroeconomic impact of Federal Reserve rate cuts on equity valuations?" or "Analyze the competitive dynamics of the GLP-1 pharmaceutical market using Porter\'s Five Forces""} rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
+          <button onClick={generateResearch} disabled={researchLoading||!researchQuery.trim()} style={{width:"100%",padding:"13px",background:researchLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:researchLoading?"not-allowed":"pointer",fontFamily:"system-ui",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            {researchLoading?<>🔄 ARIA is analyzing with economic models...</>:<>🔬 Generate Institutional Research (Ctrl+Enter)</>}
           </button>
         </div>
 
         {/* Research Result */}
-        {researchResult&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16,marginBottom:16}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{fontFamily:"monospace",fontSize:9,color:G,letterSpacing:2}}>ARIA RESEARCH REPORT</div>
+        {researchResult&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:G,letterSpacing:2,fontWeight:700}}>ARIA RESEARCH MEMORANDUM</div>
             <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af"}}>{researchResult.time}</div>
           </div>
-          <div style={{background:"#f9fafb",borderRadius:10,padding:14,fontSize:13,color:N,lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"system-ui"}}>{researchResult.result}</div>
-        </div>}
-
-        {/* Research History */}
-        {researchHistory.filter(h=>h.result).length>0&&<div>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>RESEARCH HISTORY</div>
-          {researchHistory.filter(h=>h.result).map((h,i)=>(
-            <div key={i} onClick={()=>setResearchResult(h)} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
-              <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",marginBottom:4}}>{h.time}</div>
-              <div style={{fontSize:13,fontWeight:600,color:N,lineHeight:1.4}}>{h.q}</div>
-            </div>
-          ))}
+          <div style={{fontSize:11,fontWeight:600,color:N,marginBottom:10,padding:"8px 12px",background:"#f9fafb",borderRadius:8,lineHeight:1.5}}>{researchResult.q}</div>
+          <div style={{fontSize:13,color:N,lineHeight:1.85,whiteSpace:"pre-wrap",fontFamily:"system-ui"}}>{researchResult.result}</div>
         </div>}
 
         {/* Quick Research Prompts */}
-        <div style={{marginTop:16}}>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>QUICK RESEARCH PROMPTS</div>
+        {!researchResult&&<div>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>INSTITUTIONAL RESEARCH PROMPTS</div>
           {[
-            "What is the investment outlook for AI infrastructure stocks in 2026?",
-            "Compare GLP-1 drug pipeline across Eli Lilly, Novo Nordisk, and Pfizer",
-            "Impact of Federal Reserve rate decisions on financial sector stocks",
-            "Healthcare sector M&A trends and acquisition targets in 2026",
-            "Semiconductor supply chain risks and opportunities for NVDA and AMD",
-            "Which sectors historically outperform during periods of economic uncertainty?",
-          ].map((prompt,i)=>(
-            <div key={i} onClick={()=>setResearchQuery(prompt)} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"10px 14px",marginBottom:8,cursor:"pointer",fontSize:13,color:N,lineHeight:1.4}}>
-              → {prompt}
+            {q:"Apply IS-LM framework: How do current Federal Reserve rate decisions affect equity valuations and sector rotation?",tag:"MACRO"},
+            {q:"Use Fama-French 3-Factor Model to analyze whether small-cap value stocks are currently mispriced relative to growth.",tag:"EQUITY"},
+            {q:"Analyze the GLP-1 pharmaceutical market using Porter\'s Five Forces — competitive dynamics, barriers to entry, supplier power.",tag:"SECTOR"},
+            {q:"Apply the Solow Growth Model: What is the long-term economic impact of AI investment on US productivity and GDP growth?",tag:"MACRO"},
+            {q:"Using CAPM and Beta analysis: Which current market sectors offer the best risk-adjusted returns in a high-rate environment?",tag:"RISK"},
+            {q:"Apply behavioral finance (Shiller CAPE ratio, irrational exuberance): Is the current US equity market overvalued?",tag:"VALUATION"},
+            {q:"Mundell-Fleming analysis: How do current dollar strength and trade deficits impact multinational corporate earnings?",tag:"GLOBAL"},
+            {q:"Monte Carlo scenario analysis: What are the probability-weighted outcomes for S&P 500 over the next 12 months?",tag:"RISK"},
+          ].map((p,i)=>(
+            <div key={i} onClick={()=>setResearchQuery(p.q)} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"11px 14px",marginBottom:8,cursor:"pointer",display:"flex",gap:10,alignItems:"flex-start"}}>
+              <div style={{fontFamily:"monospace",fontSize:8,padding:"3px 7px",borderRadius:4,background:"#f0fdf4",color:G,fontWeight:700,flexShrink:0,marginTop:1}}>{p.tag}</div>
+              <div style={{fontSize:12,color:N,lineHeight:1.5}}>{p.q}</div>
             </div>
           ))}
-        </div>
+        </div>}
+
+        {/* Research History */}
+        {researchHistory.filter(h=>h.result).length>0&&<div style={{marginTop:16}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>RESEARCH HISTORY</div>
+          {researchHistory.filter(h=>h.result).slice(0,5).map((h,i)=>(
+            <div key={i} onClick={()=>setResearchResult(h)} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"10px 14px",marginBottom:8,cursor:"pointer"}}>
+              <div style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af",marginBottom:3}}>{h.time}</div>
+              <div style={{fontSize:12,fontWeight:600,color:N,lineHeight:1.4}}>{h.q.slice(0,100)}{h.q.length>100?"...":""}</div>
+            </div>
+          ))}
+        </div>}
       </div>}
 
       {/* HEALTHCARE INTELLIGENCE TAB */}
-      {tab==="healthcare"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}} onScroll={()=>{if(!healthcareLoaded&&!healthcareLoading)loadHealthcare();}}>
-        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:4}}>🧬 HEALTHCARE INTELLIGENCE</div>
-        <div style={{fontSize:12,color:"#9ca3af",marginBottom:16}}>Pharma pipeline · Biotech scores · FDA calendar · Market intelligence</div>
+      {tab==="healthcare"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}} onClick={()=>{if(!healthcareLoaded&&!healthcareLoading)loadHealthcare();}}>
+        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>🧬 HEALTHCARE & PHARMA INTELLIGENCE</div>
+        <div style={{fontSize:11,color:"#9ca3af",marginBottom:16,fontFamily:"monospace"}}>FDA pipeline · Biotech themes · Pharma market intelligence</div>
 
-        {!healthcareLoaded&&!healthcareLoading&&<button onClick={loadHealthcare} style={{width:"100%",padding:14,background:N,border:"none",borderRadius:12,fontSize:14,fontWeight:700,color:"white",cursor:"pointer",marginBottom:16}}>
-          Load Healthcare Intelligence
+        {!healthcareLoaded&&!healthcareLoading&&<button onClick={loadHealthcare} style={{width:"100%",padding:14,background:N,border:"none",borderRadius:12,fontSize:14,fontWeight:700,color:"white",cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          🧬 Load Healthcare Intelligence
         </button>}
-        {healthcareLoading&&<div style={{textAlign:"center",padding:32,color:"#9ca3af",fontFamily:"monospace",fontSize:12}}>🔄 Loading healthcare data...</div>}
+        {healthcareLoading&&<div style={{textAlign:"center",padding:40,color:"#9ca3af"}}>
+          <div style={{fontSize:32,marginBottom:12}}>🧬</div>
+          <div style={{fontFamily:"monospace",fontSize:12}}>Loading pharma pipeline and biotech data...</div>
+        </div>}
 
-        {/* FDA Pipeline */}
-        <div style={{marginBottom:16}}>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>💊 FDA PIPELINE WATCH</div>
-          {healthcareData.fda.map((drug,i)=>(
-            <div key={i} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"13px 14px",marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
-                <div style={{fontWeight:700,fontSize:13,color:N,flex:1}}>{drug.drug}</div>
-                <div style={{fontFamily:"monospace",fontSize:9,padding:"3px 8px",borderRadius:6,background:drug.impact==="HIGH"?"#fef2f2":drug.impact==="MEDIUM"?"#fffbeb":"#f0fdf4",color:drug.impact==="HIGH"?R:drug.impact==="MEDIUM"?A:G,fontWeight:700}}>{drug.impact}</div>
-              </div>
-              <div style={{fontSize:11,color:"#6b7280",marginBottom:4}}>{drug.company} · {drug.status}</div>
-              <div style={{fontFamily:"monospace",fontSize:10,color:G}}>{drug.catalyst}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Healthcare Stocks */}
-        {healthcareData.stocks.length>0&&<div style={{marginBottom:16}}>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📊 HEALTHCARE COVERAGE</div>
-          <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,overflow:"hidden"}}>
-            {healthcareData.stocks.map((item,i)=>(
-              <div key={item.sym} style={{display:"flex",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid #f3f4f6",cursor:"pointer",gap:12}} onClick={()=>openSheet(item.sym)} onMouseEnter={e=>e.currentTarget.style.background="#f9fafb"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
-                <div style={{fontSize:18,width:32,textAlign:"center",flexShrink:0}}>{item.stk?.e||"💊"}</div>
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:700,fontSize:14,color:N}}>{item.sym}</div>
-                  <div style={{fontSize:10,color:"#9ca3af"}}>{item.stk?.n}</div>
+        {healthcareLoaded&&<>
+          {/* Market Overview */}
+          <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,padding:16,marginBottom:16}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:12}}>HEALTHCARE SECTOR OVERVIEW</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+              {[
+                {l:"Sector ETF",v:sectors["Healthcare"]?.etf||"XLV",s:"Healthcare ETF"},
+                {l:"ETF Change",v:fc(sectors["Healthcare"]?.change),c:sectors["Healthcare"]?.change>=0?G:R},
+                {l:"Market Size",v:"$4.5T",s:"US Healthcare 2026"},
+                {l:"GLP-1 TAM",v:"$150B+",s:"By 2030"},
+                {l:"AI Drug Discovery",v:"$2.8B",s:"Investment 2025"},
+                {l:"FDA Approvals",v:"55",s:"New drugs 2024"},
+              ].map(m=>(
+                <div key={m.l} style={{background:"#f9fafb",borderRadius:10,padding:"10px 12px"}}>
+                  <div style={{fontSize:9,color:"#9ca3af",fontFamily:"monospace",letterSpacing:1,marginBottom:4}}>{m.l}</div>
+                  <div style={{fontSize:15,fontWeight:700,color:m.c||N,fontFamily:"monospace"}}>{m.v}</div>
+                  {m.s&&<div style={{fontSize:9,color:"#9ca3af",marginTop:2}}>{m.s}</div>}
                 </div>
-                {item.sc&&<div style={{display:"inline-flex",alignItems:"center",gap:5,background:item.sc.dec==="ACCUMULATE"?"#dcfce7":item.sc.dec==="REDUCE"?"#fee2e2":"#fffbeb",borderRadius:6,padding:"3px 8px"}}>
-                  <span style={{fontFamily:"monospace",fontSize:9,fontWeight:700,color:item.sc.dec==="ACCUMULATE"?G:item.sc.dec==="REDUCE"?R:A}}>{item.sc.dec}</span>
-                </div>}
-                <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:N}}>{fp(item.q.c)}</div>
-                  <div style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:item.q.dp>=0?G:R}}>{fc(item.q.dp)}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* Investment Themes */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📈 HIGH-CONVICTION INVESTMENT THEMES</div>
+            {(healthcareData.themes||HC_THEMES).map((theme,i)=>(
+              <div key={i} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"14px",marginBottom:10}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  <div style={{fontWeight:700,fontSize:13,color:N,flex:1}}>{theme.name}</div>
+                  <div style={{fontFamily:"monospace",fontSize:9,padding:"3px 8px",borderRadius:6,background:theme.momentum==="VERY HIGH"?"#dcfce7":theme.momentum==="HIGH"?"#dbeafe":"#fffbeb",color:theme.momentum==="VERY HIGH"?G:theme.momentum==="HIGH"?"#1d4ed8":A,fontWeight:700,flexShrink:0,marginLeft:8}}>{theme.momentum}</div>
+                </div>
+                <div style={{display:"flex",gap:8,marginBottom:6}}>
+                  <span style={{fontFamily:"monospace",fontSize:9,color:"#6b7280"}}>Leader: <b style={{color:N}}>{theme.leader}</b></span>
+                  <span style={{fontFamily:"monospace",fontSize:9,color:G}}>TAM: {theme.mkt}</span>
+                </div>
+                <div style={{fontSize:12,color:"#6b7280",lineHeight:1.55}}>{theme.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* FDA Pipeline */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>💊 FDA PIPELINE WATCH 2026-2027</div>
+            {(healthcareData.fda||FDA_PIPELINE).map((drug,i)=>(
+              <div key={i} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"13px 14px",marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
+                  <div style={{fontWeight:700,fontSize:13,color:N,flex:1}}>{drug.drug}</div>
+                  <div style={{fontFamily:"monospace",fontSize:9,padding:"3px 8px",borderRadius:6,background:drug.impact==="TRANSFORMATIVE"?"#fce7f3":drug.impact==="HIGH"?"#fee2e2":"#fffbeb",color:drug.impact==="TRANSFORMATIVE"?"#9d174d":drug.impact==="HIGH"?R:A,fontWeight:700,flexShrink:0,marginLeft:6}}>{drug.impact}</div>
+                </div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:5}}>
+                  <span style={{fontFamily:"monospace",fontSize:9,color:"#6b7280"}}>{drug.company}</span>
+                  <span style={{fontFamily:"monospace",fontSize:9,padding:"1px 6px",borderRadius:4,background:"#f0fdf4",color:G}}>{drug.phase}</span>
+                  <span style={{fontFamily:"monospace",fontSize:9,color:"#6b7280"}}>📅 {drug.date}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <span style={{fontSize:11,color:N}}>{drug.indication}</span>
+                  <span style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:G}}>{drug.marketSize}</span>
                 </div>
               </div>
             ))}
           </div>
-        </div>}
 
-        {/* Healthcare News */}
-        {healthcareData.news.length>0&&<div>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📰 HEALTHCARE & PHARMA NEWS</div>
-          {healthcareData.news.map((n,i)=>(
-            <div key={i} onClick={()=>window.open(n.url,"_blank")} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
-              <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:1.5,marginBottom:4}}>{(n.source||"NEWS").toUpperCase()} · {tAgo(n.date)}</div>
-              <div style={{fontSize:13,fontWeight:600,color:N,lineHeight:1.4}}>{n.title}</div>
+          {/* Healthcare Stocks */}
+          {healthcareData.stocks&&healthcareData.stocks.length>0&&<div style={{marginBottom:16}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📊 HEALTHCARE COVERAGE UNIVERSE</div>
+            <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:14,overflow:"hidden"}}>
+              {healthcareData.stocks.map((item,i)=>(
+                <div key={item.sym} style={{display:"flex",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid #f3f4f6",cursor:"pointer",gap:12}} onClick={()=>openSheet(item.sym)} onMouseEnter={e=>e.currentTarget.style.background="#f9fafb"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
+                  <div style={{fontSize:20,width:32,textAlign:"center",flexShrink:0}}>{item.stk?.e||"💊"}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:700,fontSize:14,color:N}}>{item.sym}</div>
+                    <div style={{fontSize:10,color:"#9ca3af"}}>{item.stk?.n}</div>
+                  </div>
+                  {item.sc&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:item.sc.dec==="ACCUMULATE"?"#dcfce7":item.sc.dec==="REDUCE"?"#fee2e2":"#fffbeb",borderRadius:6,padding:"3px 8px"}}>
+                    <span style={{fontFamily:"monospace",fontSize:9,fontWeight:700,color:item.sc.dec==="ACCUMULATE"?G:item.sc.dec==="REDUCE"?R:A}}>{item.sc.dec}</span>
+                    <span style={{fontFamily:"monospace",fontSize:8,color:"#9ca3af"}}>{item.sc.total}</span>
+                  </div>}
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:N}}>{fp(item.q.c)}</div>
+                    <div style={{fontFamily:"monospace",fontSize:10,fontWeight:700,color:item.q.dp>=0?G:R}}>{fc(item.q.dp)}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>}
+          </div>}
 
-        {/* Healthcare Disclaimer */}
-        <div style={{background:"#fef9c3",border:"1px solid #fde047",borderRadius:10,padding:12,marginTop:16}}>
-          <div style={{fontSize:11,color:"#854d0e",lineHeight:1.6}}>⚠️ Healthcare intelligence is for informational and research purposes only. Not medical, clinical, or investment advice. FDA pipeline data is sourced from public filings and may not reflect the most current status. Consult qualified professionals for medical and investment decisions.</div>
-        </div>
+          {/* Healthcare News */}
+          {healthcareData.news&&healthcareData.news.length>0&&<div style={{marginBottom:16}}>
+            <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📰 PHARMA & BIOTECH NEWS</div>
+            {healthcareData.news.map((n,i)=>(
+              <div key={i} onClick={()=>window.open(n.url,"_blank")} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"12px 14px",marginBottom:8,cursor:"pointer"}}>
+                <div style={{fontFamily:"monospace",fontSize:8,color:G,letterSpacing:1.5,marginBottom:4}}>{(n.source||"NEWS").toUpperCase()} · {tAgo(n.date)}</div>
+                <div style={{fontSize:13,fontWeight:600,color:N,lineHeight:1.45}}>{n.title}</div>
+              </div>
+            ))}
+          </div>}
+
+          {/* Disclaimer */}
+          <div style={{background:"#fef9c3",border:"1px solid #fde047",borderRadius:10,padding:12}}>
+            <div style={{fontSize:11,color:"#854d0e",lineHeight:1.6}}>⚠️ Healthcare intelligence is for informational and research purposes only. Not medical, clinical, or investment advice. FDA pipeline data sourced from public filings and may not reflect the most current regulatory status. Always consult qualified medical and financial professionals.</div>
+          </div>
+        </>}
       </div>}
 
       {/* REPORTS TAB */}
       {tab==="reports"&&<div style={{position:"absolute",inset:0,overflowY:"auto",paddingBottom:70,padding:"14px 16px 70px"}}>
-        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:4}}>📑 RESEARCH REPORTS</div>
-        <div style={{fontSize:12,color:"#9ca3af",marginBottom:16}}>AI-generated institutional research reports · For informational purposes only</div>
+        <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:2}}>📑 INSTITUTIONAL RESEARCH REPORTS</div>
+        <div style={{fontSize:11,color:"#9ca3af",marginBottom:16,fontFamily:"monospace"}}>Goldman Sachs · JP Morgan · IMF quality research · AI-generated</div>
 
         {/* Report Generator */}
-        <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16,marginBottom:16}}>
-          <div style={{fontWeight:700,fontSize:15,color:N,marginBottom:12}}>Generate Sector Report</div>
+        <div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
+          <div style={{fontWeight:700,fontSize:15,color:N,marginBottom:4}}>Generate Sector Research Report</div>
+          <div style={{fontSize:12,color:"#9ca3af",marginBottom:14,lineHeight:1.5}}>ARIA applies institutional frameworks to generate Goldman Sachs-quality sector research with live market data.</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:14}}>
             {["Technology","Healthcare","Financials","Energy","Consumer","Industrials","Communication"].map(s=>(
-              <button key={s} onClick={()=>setReportSector(s)} style={{padding:"7px 14px",borderRadius:20,border:`1px solid ${reportSector===s?N:"#e5e7eb"}`,background:reportSector===s?N:"white",color:reportSector===s?"white":"#6b7280",fontFamily:"monospace",fontSize:9,cursor:"pointer",fontWeight:reportSector===s?700:400}}>{s}</button>
+              <button key={s} onClick={()=>setReportSector(s)} style={{padding:"7px 14px",borderRadius:20,border:`1px solid ${reportSector===s?N:"#e5e7eb"}`,background:reportSector===s?N:"white",color:reportSector===s?"white":"#6b7280",fontFamily:"monospace",fontSize:9,cursor:"pointer",fontWeight:reportSector===s?700:400,transition:"all .15s"}}>{s}</button>
             ))}
           </div>
-          <button onClick={generateReport} disabled={reportLoading} style={{width:"100%",padding:"13px",background:reportLoading?"#9ca3af":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:reportLoading?"not-allowed":"pointer",fontFamily:"system-ui"}}>
-            {reportLoading?`🔄 Generating ${reportSector} Report...`:`📑 Generate ${reportSector} Research Report`}
+          <button onClick={()=>generateReport()} disabled={reportLoading} style={{width:"100%",padding:"13px",background:reportLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:reportLoading?"not-allowed":"pointer",fontFamily:"system-ui",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            {reportLoading?<>🔄 Generating {reportSector} Report...</>:<>📑 Generate {reportSector} Institutional Report</>}
           </button>
         </div>
 
         {/* Report Result */}
-        {reportResult&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:16,marginBottom:16}}>
+        {reportResult&&<div style={{background:"white",border:"1px solid #e5e7eb",borderRadius:16,padding:18,marginBottom:16,boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <div style={{fontFamily:"monospace",fontSize:9,color:G,letterSpacing:2}}>FINTEL QUANTUM RESEARCH</div>
+            <div style={{fontFamily:"monospace",fontSize:9,color:G,letterSpacing:2,fontWeight:700}}>FINTEL QUANTUM INSTITUTIONAL RESEARCH</div>
             <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af"}}>{reportResult.date}</div>
           </div>
-          <div style={{fontSize:10,color:"#9ca3af",marginBottom:14,fontFamily:"monospace"}}>For informational purposes only · Not financial advice</div>
-          <div style={{fontSize:14,color:N,lineHeight:1.85,whiteSpace:"pre-wrap",fontFamily:"system-ui"}}>{reportResult.content}</div>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",marginBottom:14}}>For informational purposes only · Not financial advice · AI-generated</div>
+          <div style={{fontSize:13,color:N,lineHeight:1.9,whiteSpace:"pre-wrap",fontFamily:"system-ui"}}>{reportResult.content}</div>
           <div style={{marginTop:16,padding:"12px 14px",background:"#f0fdf4",borderRadius:10,fontSize:11,color:"#166534",lineHeight:1.6}}>
-            📄 This report was generated by ARIA (Llama 3.3 70B) for Fintel Quantum. All content is for informational and educational research purposes only. This is not financial, investment, or professional advice. Past performance does not guarantee future results.
+            📄 Generated by ARIA (Llama 3.3 70B) for Fintel Quantum. All content is for informational and educational research purposes only. Not financial, investment, or professional advice.
           </div>
         </div>}
 
-        {/* Report Templates */}
-        <div>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>REPORT LIBRARY</div>
+        {/* Report Library */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#9ca3af",letterSpacing:2,marginBottom:10}}>📚 REPORT LIBRARY</div>
           {[
-            {title:"Weekly Market Pulse",desc:"S&P 500, sector rotation, macro indicators summary",icon:"📊"},
-            {title:"Earnings Preview",desc:"Upcoming earnings analysis and consensus estimates",icon:"📅"},
-            {title:"Sector Deep Dive",desc:"Comprehensive single-sector analysis and top picks",icon:"🔍"},
-            {title:"Macro Intelligence Brief",desc:"Fed policy, inflation, GDP impact on markets",icon:"🌍"},
-            {title:"Healthcare Pipeline Report",desc:"FDA calendar, drug approvals, biotech catalysts",icon:"🧬"},
-            {title:"AI & Technology Outlook",desc:"Semiconductor cycle, AI infrastructure, cloud growth",icon:"⚡"},
+            {title:"Technology Sector — AI Infrastructure Supercycle",desc:"Semiconductor capex cycle, hyperscaler spending, AI monetization timelines. Covers NVDA, AMD, AVGO, MSFT.",icon:"⚡",sector:"Technology"},
+            {title:"Healthcare — GLP-1 Market Dynamics",desc:"Competitive landscape analysis, pipeline comparison, market share projections through 2030.",icon:"🧬",sector:"Healthcare"},
+            {title:"Financials — Rate Cycle & Bank Earnings",desc:"NIM expansion analysis, credit quality trends, capital markets recovery. JPM, GS, BAC covered.",icon:"🏦",sector:"Financials"},
+            {title:"Energy — Transition & Traditional Mix",desc:"Renewable vs fossil fuel capex, refinery margins, LNG exports, carbon pricing impact.",icon:"⛽",sector:"Energy"},
+            {title:"Consumer — Discretionary vs Staples",desc:"Spending resilience, private label share gains, e-commerce penetration, AMZN vs WMT dynamics.",icon:"🛒",sector:"Consumer"},
+            {title:"Industrials — Reshoring & Defense Cycle",desc:"Nearshoring capex, aerospace recovery, defense budget expansion, automation investment wave.",icon:"🏭",sector:"Industrials"},
           ].map((r,i)=>(
-            <div key={i} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"14px",marginBottom:10,display:"flex",gap:12,alignItems:"center"}}>
-              <div style={{fontSize:24,flexShrink:0}}>{r.icon}</div>
+            <div key={i} style={{background:"white",border:"1px solid #e5e7eb",borderRadius:12,padding:"14px",marginBottom:10,display:"flex",gap:12,alignItems:"flex-start"}}>
+              <div style={{fontSize:26,flexShrink:0,width:36,textAlign:"center"}}>{r.icon}</div>
               <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:13,color:N,marginBottom:3}}>{r.title}</div>
-                <div style={{fontSize:11,color:"#9ca3af",lineHeight:1.4}}>{r.desc}</div>
+                <div style={{fontWeight:700,fontSize:13,color:N,marginBottom:4}}>{r.title}</div>
+                <div style={{fontSize:11,color:"#9ca3af",lineHeight:1.5,marginBottom:8}}>{r.desc}</div>
+                <button onClick={()=>{setReportSector(r.sector);generateReport(r.sector);}} disabled={reportLoading} style={{padding:"7px 14px",background:N,border:"none",borderRadius:8,fontSize:11,fontWeight:700,color:"white",cursor:"pointer"}}>
+                  Generate Report →
+                </button>
               </div>
-              <button onClick={()=>{setReportSector(r.title.includes("Health")?"Healthcare":r.title.includes("Tech")||r.title.includes("AI")?"Technology":"Technology");setTimeout(generateReport,100);}} style={{padding:"8px 14px",background:N,border:"none",borderRadius:8,fontSize:12,fontWeight:700,color:"white",cursor:"pointer",flexShrink:0}}>Generate</button>
             </div>
           ))}
+        </div>
+
+        {/* Consulting Services */}
+        <div style={{background:"linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%)",borderRadius:16,padding:20,marginBottom:16}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"rgba(255,255,255,.5)",letterSpacing:2,marginBottom:8}}>ENTERPRISE CONSULTING</div>
+          <div style={{fontSize:17,fontWeight:800,color:"white",marginBottom:8}}>Custom Research for Hedge Funds & Institutions</div>
+          <div style={{fontSize:12,color:"rgba(255,255,255,.6)",lineHeight:1.6,marginBottom:14}}>
+            Bespoke sector research · Valuation models · Due diligence · Competitive intelligence · Monthly research packages
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+            {[
+              {tier:"Research",price:"$500/mo",items:"3 sector reports + ARIA access"},
+              {tier:"Professional",price:"$2,000/mo",items:"Unlimited reports + custom queries"},
+              {tier:"Enterprise",price:"$5,000/mo",items:"White-label + API + dedicated ARIA"},
+              {tier:"Institutional",price:"Custom",items:"Full platform + consulting team"},
+            ].map(t=>(
+              <div key={t.tier} style={{background:"rgba(255,255,255,.08)",borderRadius:10,padding:"12px"}}>
+                <div style={{fontFamily:"monospace",fontSize:9,color:"rgba(255,255,255,.5)",marginBottom:4}}>{t.tier.toUpperCase()}</div>
+                <div style={{fontSize:16,fontWeight:800,color:"#22c55e",marginBottom:4}}>{t.price}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,.5)",lineHeight:1.4}}>{t.items}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{fontFamily:"monospace",fontSize:10,color:"rgba(255,255,255,.3)",textAlign:"center"}}>contact@fintelquantum.com · enterprise.fintelquantum.com</div>
         </div>
       </div>}
 
