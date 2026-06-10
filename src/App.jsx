@@ -549,14 +549,14 @@ export default function App(){
   const HC_SYMBOLS=["LLY","JNJ","UNH","ABBV","MRK","PFE","AMGN","ISRG","BSX","VRTX","REGN","MRNA","GILD","BMY","BIIB"];
   const HC_THEMES=[
     {name:"GLP-1 / Obesity Revolution",leader:"LLY",mkt:"$150B+ by 2030",desc:"Oral and injectable GLP-1 agonists transforming metabolic disease. Orforglipron oral form expands market 5x.",momentum:"VERY HIGH"},
-    {name:"Alzheimer\'s Disease",leader:"LLY",mkt:"$15B+ by 2028",desc:"Donanemab and Lecanemab approved — first disease-modifying treatments. Blood biomarker testing accelerating early diagnosis.",momentum:"HIGH"},
+    {name:"Alzheimer's Disease",leader:"LLY",mkt:"$15B+ by 2028",desc:"Donanemab and Lecanemab approved — first disease-modifying treatments. Blood biomarker testing accelerating early diagnosis.",momentum:"HIGH"},
     {name:"Cancer Immunotherapy",leader:"BMY",mkt:"$200B+ by 2030",desc:"Checkpoint inhibitors, CAR-T, ADC technologies expanding. Combinations show 40%+ superior outcomes vs monotherapy.",momentum:"HIGH"},
     {name:"Gene & Cell Therapy",leader:"VRTX",mkt:"$10B+ by 2028",desc:"CRISPR cures for sickle cell approved 2023. Platform applicable across 6,000+ rare genetic diseases.",momentum:"MEDIUM"},
     {name:"Surgical Robotics & AI",leader:"ISRG",mkt:"$22B+ by 2028",desc:"Da Vinci dominates with >75% market share. AI-guided surgery reducing complications 35%.",momentum:"HIGH"},
   ];
   const FDA_PIPELINE=[
     {drug:"Orforglipron",type:"Oral GLP-1 Agonist",company:"Eli Lilly (LLY)",phase:"Phase 3",date:"Q3 2026",indication:"Obesity / T2D",impact:"TRANSFORMATIVE",marketSize:"$80B+"},
-    {drug:"Donanemab",type:"Anti-amyloid mAb",company:"Eli Lilly (LLY)",phase:"Approved",date:"2024",indication:"Early Alzheimer\'s",impact:"HIGH",marketSize:"$15B"},
+    {drug:"Donanemab",type:"Anti-amyloid mAb",company:"Eli Lilly (LLY)",phase:"Approved",date:"2024",indication:"Early Alzheimer's",impact:"HIGH",marketSize:"$15B"},
     {drug:"Zilebesiran",type:"siRNA Therapy",company:"Alnylam/Roche",phase:"Phase 3",date:"Q4 2026",indication:"Hypertension",impact:"HIGH",marketSize:"$20B"},
     {drug:"Tarlatamab",type:"BiTE Antibody",company:"Amgen (AMGN)",phase:"Approved",date:"2024",indication:"Small Cell Lung Cancer",impact:"MEDIUM",marketSize:"$3B"},
     {drug:"NTLA-2002",type:"CRISPR In Vivo",company:"Intellia Therapeutics",phase:"Phase 3",date:"2027",indication:"Hereditary Angioedema",impact:"HIGH",marketSize:"$5B"},
@@ -576,7 +576,7 @@ export default function App(){
     const mktCtx=`SPY: $${data["SPY"]?.c?.toFixed(2)||"N/A"} (${data["SPY"]?.dp?.toFixed(2)||0}%), QQQ: $${data["QQQ"]?.c?.toFixed(2)||"N/A"} (${data["QQQ"]?.dp?.toFixed(2)||0}%). Fed Rate: ${macro["Fed Rate"]?.value||5.33}%, CPI: ${macro["Inflation"]?.value||2.7}%, GDP: ${macro["GDP Growth"]?.value||2.4}%, Unemployment: ${macro["Unemployment"]?.value||4.2}%. Breadth: ${upPct}% advancing.`;
     try{
       const r=await apiPost("/api/chat",{
-        message:`You are ARIA, Fintel Quantum\'s Chief Research Economist — trained in the tradition of Eugene Fama (Efficient Markets Hypothesis), Robert Shiller (behavioral finance & CAPE ratio), Harry Markowitz (Modern Portfolio Theory), Kenneth Arrow (general equilibrium), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.
+        message:`You are ARIA, Fintel Quantum's Chief Research Economist — trained in the tradition of Eugene Fama (Efficient Markets Hypothesis), Robert Shiller (behavioral finance & CAPE ratio), Harry Markowitz (Modern Portfolio Theory), Kenneth Arrow (general equilibrium), and John Maynard Keynes (macroeconomics). You apply Nobel Prize-caliber frameworks to produce institutional-grade research.
 
 LIVE MARKET DATA: ${mktCtx}
 
@@ -591,7 +591,7 @@ EXECUTIVE SUMMARY
 [2-3 sentences. Precise thesis with conviction. No hedging.]
 
 ECONOMIC FRAMEWORK APPLIED
-[State the specific model — IS-LM, Fama-French 3-Factor, Phillips Curve, Porter\'s Five Forces, Solow Growth Model, CAPM, Black-Scholes, etc. Explain why this is the optimal framework.]
+[State the specific model — IS-LM, Fama-French 3-Factor, Phillips Curve, Porter's Five Forces, Solow Growth Model, CAPM, Black-Scholes, etc. Explain why this is the optimal framework.]
 
 QUANTITATIVE ANALYSIS
 [Apply rigorously. Use real numbers, ratios, percentages. Reference the live macro data above. Show your analytical reasoning step by step.]
@@ -1425,7 +1425,7 @@ Key Risk: [single biggest threat]
               <div style={{fontSize:10,color:"#9ca3af"}}>Fama-French · IS-LM · CAPM · Porter · Solow · Black-Scholes</div>
             </div>
           </div>
-          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder={"e.g. "What is the macroeconomic impact of Federal Reserve rate cuts on equity valuations?" or "Analyze the competitive dynamics of the GLP-1 pharmaceutical market using Porter\'s Five Forces""} rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
+          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder="Enter your research question..."} rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
           <button onClick={generateResearch} disabled={researchLoading||!researchQuery.trim()} style={{width:"100%",padding:"13px",background:researchLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:researchLoading?"not-allowed":"pointer",fontFamily:"system-ui",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             {researchLoading?<>🔄 ARIA is analyzing with economic models...</>:<>🔬 Generate Institutional Research (Ctrl+Enter)</>}
           </button>
@@ -1447,7 +1447,7 @@ Key Risk: [single biggest threat]
           {[
             {q:"Apply IS-LM framework: How do current Federal Reserve rate decisions affect equity valuations and sector rotation?",tag:"MACRO"},
             {q:"Use Fama-French 3-Factor Model to analyze whether small-cap value stocks are currently mispriced relative to growth.",tag:"EQUITY"},
-            {q:"Analyze the GLP-1 pharmaceutical market using Porter\'s Five Forces — competitive dynamics, barriers to entry, supplier power.",tag:"SECTOR"},
+            {q:"Analyze the GLP-1 pharmaceutical market using Porter's Five Forces — competitive dynamics, barriers to entry, supplier power.",tag:"SECTOR"},
             {q:"Apply the Solow Growth Model: What is the long-term economic impact of AI investment on US productivity and GDP growth?",tag:"MACRO"},
             {q:"Using CAPM and Beta analysis: Which current market sectors offer the best risk-adjusted returns in a high-rate environment?",tag:"RISK"},
             {q:"Apply behavioral finance (Shiller CAPE ratio, irrational exuberance): Is the current US equity market overvalued?",tag:"VALUATION"},
@@ -1470,7 +1470,6 @@ Key Risk: [single biggest threat]
               <div style={{fontSize:12,fontWeight:600,color:N,lineHeight:1.4}}>{h.q.slice(0,100)}{h.q.length>100?"...":""}</div>
             </div>
           ))}
-        </div>}
       </div>}
 
       {/* HEALTHCARE INTELLIGENCE TAB */}
