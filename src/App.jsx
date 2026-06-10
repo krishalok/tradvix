@@ -1425,7 +1425,7 @@ Key Risk: [single biggest threat]
               <div style={{fontSize:10,color:"#9ca3af"}}>Fama-French · IS-LM · CAPM · Porter · Solow · Black-Scholes</div>
             </div>
           </div>
-          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder="Enter your research question..."} rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
+          <textarea value={researchQuery} onChange={e=>setResearchQuery(e.target.value)} placeholder="Enter your research question..." rows={4} style={{width:"100%",padding:"12px 14px",border:"1.5px solid #e5e7eb",borderRadius:10,fontSize:13,color:N,outline:"none",fontFamily:"system-ui",resize:"none",boxSizing:"border-box",marginBottom:10,lineHeight:1.6}} onFocus={e=>e.target.style.borderColor=N} onBlur={e=>e.target.style.borderColor="#e5e7eb"} onKeyDown={e=>{if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();generateResearch();}}}/>
           <button onClick={generateResearch} disabled={researchLoading||!researchQuery.trim()} style={{width:"100%",padding:"13px",background:researchLoading?"#6b7280":N,border:"none",borderRadius:10,fontSize:14,fontWeight:700,color:"white",cursor:researchLoading?"not-allowed":"pointer",fontFamily:"system-ui",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             {researchLoading?<>🔄 ARIA is analyzing with economic models...</>:<>🔬 Generate Institutional Research (Ctrl+Enter)</>}
           </button>
@@ -1470,6 +1470,7 @@ Key Risk: [single biggest threat]
               <div style={{fontSize:12,fontWeight:600,color:N,lineHeight:1.4}}>{h.q.slice(0,100)}{h.q.length>100?"...":""}</div>
             </div>
           ))}
+        </div>}
       </div>}
 
       {/* HEALTHCARE INTELLIGENCE TAB */}
